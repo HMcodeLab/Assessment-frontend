@@ -1,0 +1,136 @@
+.thankpage {
+    width: 80%;
+    max-width: 800px;
+    margin: 10px auto;
+    /* height: 60%; */
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .thank-you {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: sans-serif;
+  }
+  
+  .thank-you h1 {
+    font-size: 30px;
+    margin-bottom: 1rem;
+  }
+  
+  .thank-you p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+  
+  .thank-you .button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .thank-you .button-container button {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+  
+  .thank-you .button-container .view-order {
+    background-color: #1DBF73;
+    color: #fff;
+  }
+  
+  .thank-you .button-container .continue-shopping {
+    background-color: #fff;
+    border: 1px solid #1DBF73;
+    color: #1DBF73;
+    font-weight: 600px;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .thank-you h1 {
+      font-size: 1.5rem;
+    }
+  
+    .thank-you p {
+      font-size: 0.8rem;
+    }
+  
+    .thank-you .button-container {
+      flex-direction: column;
+    }
+  
+    .thank-you .button-container button {
+      margin-bottom: 1rem;
+    }
+    .thankpage  {
+      width: 98%;
+      margin-inline: 10px;
+    }
+    .thank-you{
+      justify-content: center;
+      min-height: 60vh;
+    }
+    .thank-you p {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .thank-you .button-container {
+      align-items: center;
+    }
+    .thank-you .button-container button{
+      padding: 6px 20px;
+      margin: 0;
+    }
+  }
+  
+  
+  @media (min-width: 320px) and (max-width: 480px){
+    .thankpage  {
+      width: 80%;
+      margin: 20px auto;
+    }
+    .thank-you{
+      justify-content: center;
+      min-height: 65vh;
+    }
+    .thank-you p {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .thank-you .button-container {
+      align-items: center;
+    }
+    .thank-you .button-container button{
+      padding: 6px 20px;
+      margin: 0;
+    }
+  }
+  
+  @media (min-width: 720px) and (max-width: 1024px){
+    .thankpage  {
+      width: 60%;
+      margin: 20px auto;
+    }
+    .thank-you{
+      justify-content: center;
+      min-height: 50vh;
+    }
+    .thank-you p {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .thank-you .button-container {
+      align-items: center;
+    }
+    .thank-you .button-container button{
+      padding: 6px 20px;
+      margin: 0;
+    }
+  }
