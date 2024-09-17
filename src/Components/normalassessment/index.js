@@ -93,19 +93,19 @@ const [proctoringActive, setProctoringActive] = useState({
   // }, []);
   async function Fetchdata() {
     try {
-      let url = `${BASE_URL}/getAssesmentQuestion?index=${params.get("index")}`;
+      let url = `${BASE_URL}/getAssesmentAllQuestions`;
       setshow(true);
       const data = await fetch(url, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` ,
       "Content-Type": "application/json"},
       });
-      const response = await data.json();
+      const response = await data[index].json();
       if (response.success) {
         setshow(false);
         
-        setdata(response);
-        setLength(response?.totalQuestions);
+        setdata(response?.questions);
+                setLength(response?.totalQuestions);
       } else {
         localStorage.removeItem(localStorage.getItem('assesmenttoken'))
         // navigate("/submitted");
@@ -117,7 +117,7 @@ const [proctoringActive, setProctoringActive] = useState({
 
   useEffect(() => {
     Fetchdata();
-  }, [params.get("index")]);
+  }, []);
  
 
 
@@ -133,17 +133,17 @@ const [proctoringActive, setProctoringActive] = useState({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          index:params.get('index'),
+          index:index,
           answer: Selected
           
         }),
       });
       const response = await data1.json();
       if (response.success) {
-        setindex(index + 1);
         setshow(false);
+        setindex(index + 1);
         setSelected("");
-        navigate(`/nmquestion?index=${index + 1}&t=${params.get('t')}`);
+        // navigate(`/nmquestion?index=${index + 1}&t=${params.get('t')}`);
       }
     } catch (error) {
       console.log(error);
@@ -152,19 +152,18 @@ const [proctoringActive, setProctoringActive] = useState({
 
   function Nextquestion() {
     if (index <= Length) {
-      Fetchdata();
+      // Fetchdata();
       
       setSelected("");
       setindex(index + 1);
-      navigate(`/nmquestion?index=${index + 1}&t=${params.get('t')}`);
     }
   }
 
   function Previousquestion() {
     if (index >= 1) {
-      Fetchdata();
       setindex(index - 1);
-      navigate(`/nmquestion?index=${index - 1}&t=${params.get('t')}`);
+      setSelected("");
+      // navigate(`/nmquestion?index=${index - 1}&t=${params.get('t')}`);
     }
   }
 
@@ -184,7 +183,7 @@ const [proctoringActive, setProctoringActive] = useState({
           remarks:remarks
         }),
       });
-      const response = await data.json();
+      const response = await data[index].json();
       if (response.success) {
         localStorage.removeItem(localStorage.getItem('assesmenttoken'))
         if(status){
@@ -376,7 +375,7 @@ let tempstate=true;
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop">
           <div onClick={handlePrev} className="flex items-center space-x-3 cursor-pointer">
             <FaArrowLeft />
-            <p className="font-semibold">Go Back to {data?.module} Module</p>
+            <p className="font-semibold">Go Back to {data[index]?.module} Module</p>
           </div>
           <div className=" bg-white p-2 rounded-lg shadow-md">
           Time Remaining: {timer} mins
@@ -387,8 +386,8 @@ let tempstate=true;
               onClick={() => (index > 1 ? Previousquestion() : "")}
             />
             <FaGreaterThan
-              className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index === Length ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-              onClick={() => (index < Length ? Nextquestion() : "")}
+              className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index+1 === Length ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              onClick={() => (index+1 < Length ? Nextquestion() : "")}
             />
           </div>
         </div>
@@ -397,31 +396,31 @@ let tempstate=true;
         <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop">
           <div className="flex flex-col max-h-full overflow-y-auto gap-2 question">
           {Array.from({ length: Length }).map((_, ind) => (
-        <button onClick={()=>navigate(`/nmquestion?index=${ind + 1}&t=${params.get('t')}`)} key={index} className="border shadow-sm p-1">
+        <button onClick={()=>setindex(ind)} key={ind} className={`border shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
           {ind+1}
         </button>
       ))}
           </div>
 
           <div className="w-[60%] rounded-xl border h-full shadow-xl xsm:w-full">
-            <div className="border-b-[2px] p-3 font-semibold">{data?.module}</div>
-            <div className="p-3 text-lg text-gray-700">Q:{params.get("index")}{") "} {data?.question?.question}</div>
+            <div className="border-b-[2px] p-3 font-semibold">{data[index]?.module}</div>
+            <div className="p-3 text-lg text-gray-700">Q:{index+1}{") "} {data[index]?.question}</div>
           </div>
           <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit">
             <div className="border-b-[2px] p-3 font-semibold">Options</div>
             <div className="flex flex-col p-5 gap-y-5">
-              {data?.question?.options && Object.entries(data.question.options).map(([key, value]) => (
+              {data[index]?.options && Object.entries(data[index]?.options).map(([key, value]) => (
                 <label
                   key={key}
-                  onClick={() => !data?.isSubmitted ? setSelected(key.toString()) : ""}
+                  onClick={() => !data[index]?.isSubmitted ? setSelected(key.toString()) : ""}
                   htmlFor={key.toString()}
-                  className={`${Selected === key.toString() || data?.submittedAnswer === key.toString() ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
+                  className={`${Selected === key.toString() || data[index]?.submittedAnswer === key.toString() ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
                 >
                   <input
                     name="option"
                     id={key.toString()}
                     type="radio"
-                    checked={data?.isSubmitted ? data.submittedAnswer === key.toString() : Selected === key.toString()}
+                    checked={data[index]?.isSubmitted ? data[index].submittedAnswer === key.toString() : Selected === key.toString()}
                     className="accent-[#1DBF73]"
                     readOnly
                   />
@@ -430,12 +429,12 @@ let tempstate=true;
               ))}
               <div className="flex justify-end space-x-2">
                 <button
-                  className={`py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
-                  onClick={() => !data?.isSubmitted ? handleSubmit() : ""}
+                  className={`py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
+                  onClick={() => !data[index]?.isSubmitted ? handleSubmit() : ""}
                 >
                   Save
                 </button>
-                {Length === parseInt(params.get("index")) && (
+                {Length === index+1 && (
                   <button className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white" onClick={()=>handleClick(false,'')}>
                     Finish
                   </button>

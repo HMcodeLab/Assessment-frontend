@@ -14,7 +14,7 @@ export default function NewQuestion() {
   const [data, setdata] = useState([]);
   const [show, setshow] = useState(false);
   const [params, setparams] = useSearchParams();
-  const [index, setindex] = useState(1);
+  const [index, setindex] = useState(0);
   const [audioAlert, setAudioAlert] = useState(false);
   const [tabwarning, settabwarning] = useState(0);
   let [peoplewarning, setpeoplewarning] = useState(3);
@@ -69,7 +69,7 @@ const [proctoringActive, setProctoringActive] = useState({
 
   async function Fetchdata() {
     try {
-      let url = `${BASE_URL}/getAssesmentQuestion?index=${params.get("index")}`;
+      let url = `${BASE_URL}/getAssesmentAllQuestions`;
       setshow(true);
       // setindex(params.get("index"))
       const data = await fetch(url, {
@@ -88,9 +88,10 @@ const [proctoringActive, setProctoringActive] = useState({
 // console.log(newProctoringActive);
 
     setProctoringActive(newProctoringActive); 
-        setdata(response);
+        setdata(response?.questions);
         setLength(response?.totalQuestions);
       } else {
+        toast.success(response?.message)
         localStorage.removeItem(localStorage.getItem('assesmenttoken'))
         // navigate("/submitted");
       }
@@ -101,7 +102,7 @@ const [proctoringActive, setProctoringActive] = useState({
 
   useEffect(() => {
     Fetchdata();
-  }, [params.get('index')]);
+  }, []);
   const loadModelAndDetect = async () => {
     const model = await cocoSsd.load();
     setcameraActive(true)
@@ -181,17 +182,17 @@ const [proctoringActive, setProctoringActive] = useState({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          index:params.get('index'),
+          index:index,
           answer: Selected
           
         }),
       });
       const response = await data1.json();
       if (response.success) {
-        setindex((prev)=>prev+1);
         setshow(false);
+        setindex((prev)=>prev+1);
         setSelected("");
-        navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
+        // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
       }
     } catch (error) {
       console.log(error);
@@ -204,52 +205,53 @@ const [proctoringActive, setProctoringActive] = useState({
       
       setSelected("");
       setindex((prev)=>prev+1);
-      navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
+      // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
     }
   }
 
   function Previousquestion() {
     if (index >= 1) {
       // Fetchdata();
+      setSelected("");
       setindex((prev)=>prev-1);
-      navigate(`/question?index=${index - 1}&t=${params.get('t')}`);
+      // navigate(`/question?index=${index - 1}&t=${params.get('t')}`);
     }
   }
 
   async function handleClick(status,remarks) {
-    try {
-      let url = `${BASE_URL}/finishAssessment`;
-      const data = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          isSuspended:status,
-          ProctoringScore:ProctoringScore,
-          remarks:remarks
-        }),
-      });
-      const response = await data.json();
-      if (response.success) {
-        localStorage.removeItem(localStorage.getItem('assesmenttoken'))
-        if(status){
-          toast.error("Suspended!");
-          window.location.replace('/suspended');
-        }
-        else{
-          toast.success("Submitted Successfully");
-          window.location.replace('/submitted');
-        }
+    // try {
+    //   let url = `${BASE_URL}/finishAssessment`;
+    //   const data = await fetch(url, {
+    //     method: "PUT",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //     body: JSON.stringify({ 
+    //       isSuspended:status,
+    //       ProctoringScore:ProctoringScore,
+    //       remarks:remarks
+    //     }),
+    //   });
+    //   const response = await data.json();
+    //   if (response.success) {
+    //     localStorage.removeItem(localStorage.getItem('assesmenttoken'))
+    //     if(status){
+    //       toast.error("Suspended!");
+    //       window.location.replace('/suspended');
+    //     }
+    //     else{
+    //       toast.success("Submitted Successfully");
+    //       window.location.replace('/submitted');
+    //     }
      
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    //   } else {
+    //     toast.error(response.message);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   function handlePrev() {
@@ -497,7 +499,7 @@ let tempstate=true;
   }, [enablefullscreen]);
   function handleQuestionNumber(ind){
 // setindex(ind)
-navigate(`/question?index=${ind}&t=${params.get('t')}`)
+// navigate(`/question?index=${ind}&t=${params.get('t')}`)
   }
   return (
     <>
@@ -546,7 +548,7 @@ navigate(`/question?index=${ind}&t=${params.get('t')}`)
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop">
           <div onClick={handlePrev} className="flex items-center space-x-3 cursor-pointer">
             <FaArrowLeft />
-            <p className="font-semibold">Go Back to {data?.module} Module</p>
+            <p className="font-semibold">Go Back to {data[index]?.module} Module</p>
           </div>
           <div className=" bg-white p-2 rounded-lg shadow-md">
           Time Remaining: {timer} mins
@@ -557,8 +559,8 @@ navigate(`/question?index=${ind}&t=${params.get('t')}`)
               onClick={() => (index > 1 ? Previousquestion() : "")}
             />
             <FaGreaterThan
-              className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index === Length ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-              onClick={() => (index < Length ? Nextquestion() : "")}
+              className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index+1 === Length ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              onClick={() => (index+1 < Length ? Nextquestion() : "")}
             />
           </div>
         </div>
@@ -567,31 +569,31 @@ navigate(`/question?index=${ind}&t=${params.get('t')}`)
         <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop scrollbarnumber">
           <div className="flex flex-col max-h-full overflow-y-auto gap-2 question">
           {Array.from({ length: Length }).map((_, ind) => (
-        <button onClick={()=>handleQuestionNumber(ind+1)} key={ind} className="border shadow-sm p-1">
+        <button onClick={()=>setindex(ind)} key={ind} className={`border shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
           {ind+1}
         </button>
       ))}
           </div>
 
           <div className="w-[60%] rounded-xl border h-full shadow-xl xsm:w-full">
-            <div className="border-b-[2px] p-3 font-semibold">{data?.module}</div>
-            <div className="p-3 text-lg text-gray-700">Q:{params.get("index")}{") "} {data?.question?.question}</div>
+            <div className="border-b-[2px] p-3 font-semibold">{data[index]?.module}</div>
+            <div className="p-3 text-lg text-gray-700">Q:{index+1}{") "} {data[index]?.question}</div>
           </div>
           <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit">
             <div className="border-b-[2px] p-3 font-semibold">Options</div>
             <div className="flex flex-col p-5 gap-y-5">
-              {data?.question?.options && Object.entries(data.question.options).map(([key, value]) => (
+              {data[index]?.options && Object.entries(data[index]?.options).map(([key, value]) => (
                 <label
                   key={key}
-                  onClick={() => !data?.isSubmitted ? setSelected(key.toString()) : ""}
+                  onClick={() => !data[index]?.isSubmitted ? setSelected(key.toString()) : ""}
                   htmlFor={key.toString()}
-                  className={`${Selected === key.toString() || data?.submittedAnswer === key.toString() ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
+                  className={`${Selected === key.toString() || data[index]?.submittedAnswer === key.toString() ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
                 >
                   <input
                     name="option"
                     id={key.toString()}
                     type="radio"
-                    checked={data?.isSubmitted ? data.submittedAnswer === key.toString() : Selected === key.toString()}
+                    checked={data[index]?.isSubmitted ? data[index].submittedAnswer === key.toString() : Selected === key.toString()}
                     className="accent-[#1DBF73]"
                     readOnly
                   />
@@ -600,12 +602,12 @@ navigate(`/question?index=${ind}&t=${params.get('t')}`)
               ))}
               <div className="flex justify-end space-x-2">
                 <button
-                  className={`py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
-                  onClick={() => !data?.isSubmitted ? handleSubmit() : ""}
+                  className={`py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
+                  onClick={() => !data[index]?.isSubmitted ? handleSubmit() : ""}
                 >
                   Save
                 </button>
-                {Length === parseInt(params.get("index")) && (
+                {Length === index+1 && (
                   <button className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white" onClick={()=>handleClick(false,'')}>
                     Finish
                   </button>
