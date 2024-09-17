@@ -8,6 +8,7 @@ import NewQuestion from './Components/newpatternquestion';
 import Submittedassessment from './Components/Submittedpage/submitassessment';
 import Suspended from './Components/Submittedpage/suspended';
 import Normalassessment from './Components/normalassessment';
+import TestTimer from './Components/temp';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path='/submitted' element={<Submittedassessment/>}/>
       <Route path='/suspended' element={<Suspended/>}/>
       <Route path='/nmquestion' element={<Normalassessment/>}/>
+      <Route path='/temp' element={<TestTimer/>}/>
     </Routes>
     </BrowserRouter>
   );

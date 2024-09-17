@@ -189,6 +189,11 @@ const [proctoringActive, setProctoringActive] = useState({
       });
       const response = await data1.json();
       if (response.success) {
+        setdata((prevArr) => {
+          const newArr = [...prevArr]; // Create a shallow copy of the array
+          newArr[index] = { ...newArr[index], submittedAnswer: Selected,isSubmitted:true }; // Update the specific object
+          return newArr; // Set the updated array
+        });
         setshow(false);
         setindex((prev)=>prev+1);
         setSelected("");
@@ -545,7 +550,7 @@ let tempstate=true;
         {
           !enablefullscreen ? <div className="h-screen w-full flex justify-center items-center"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
         <>
-        <div className="flex justify-between items-center border p-3 rounded-lg font-pop">
+        <div className="flex justify-between items-center border p-3 rounded-lg font-pop" onContextMenu={(e)=>e.preventDefault()}>
           <div onClick={handlePrev} className="flex items-center space-x-3 cursor-pointer">
             <FaArrowLeft />
             <p className="font-semibold">Go Back to {data[index]?.module} Module</p>
