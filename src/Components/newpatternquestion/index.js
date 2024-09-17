@@ -182,7 +182,7 @@ const [proctoringActive, setProctoringActive] = useState({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          index:index,
+          index:index+1,
           answer: Selected
           
         }),
