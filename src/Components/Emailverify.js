@@ -63,7 +63,7 @@ let navigate=useNavigate()
               type="submit"
               className="w-full bg-pink-600 text-white py-3 rounded-lg font-medium hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 transition duration-300"
             >
-              Send Verification Email
+              Verify Email
             </button>
           </form>
       </div>
