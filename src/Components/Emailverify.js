@@ -9,7 +9,10 @@ const EmailVerificationForm = () => {
   const [query,setquery]=useSearchParams()
   const [data, setdata] = useState()
   let assessmentToken= query.get('assessmenttoken')
-  localStorage.setItem('assessmenttoken',assessmentToken)
+  if(assessmentToken){
+    localStorage.setItem('assessmenttoken',assessmentToken)
+
+  }
 let navigate=useNavigate()
 const [futureDate, setFutureDate] = useState(null);
 

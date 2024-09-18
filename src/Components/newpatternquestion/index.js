@@ -230,39 +230,39 @@ const [proctoringActive, setProctoringActive] = useState({
   }
 
   async function handleClick(status,remarks) {
-    try {
-      let url = `${BASE_URL}/finishAssessment`;
-      const data = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          isSuspended:status,
-          ProctoringScore:ProctoringScore,
-          remarks:remarks
-        }),
-      });
-      const response = await data.json();
-      if (response.success) {
-        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-        if(status){
-          toast.error("Suspended!");
-          window.location.replace('/suspended');
-        }
-        else{
-          toast.success("Submitted Successfully");
-          window.location.replace('/submitted');
-        }
+    // try {
+    //   let url = `${BASE_URL}/finishAssessment`;
+    //   const data = await fetch(url, {
+    //     method: "PUT",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //     body: JSON.stringify({ 
+    //       isSuspended:status,
+    //       ProctoringScore:ProctoringScore,
+    //       remarks:remarks
+    //     }),
+    //   });
+    //   const response = await data.json();
+    //   if (response.success) {
+    //     localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+    //     if(status){
+    //       toast.error("Suspended!");
+    //       window.location.replace('/suspended');
+    //     }
+    //     else{
+    //       toast.success("Submitted Successfully");
+    //       window.location.replace('/submitted');
+    //     }
      
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    //   } else {
+    //     toast.error(response.message);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   function handlePrev() {
@@ -574,7 +574,7 @@ useEffect(() => {
             <canvas ref={canvasRef} width="200" height="180" className='absolute top-0' />
           </div>
         </div>
-      { enablefullscreen ? <div className="fixed bottom-10 left-[250px] flex items-center gap-5">
+      { enablefullscreen ? <div className="fixed bottom-2 left-[250px] flex items-center gap-5">
           <div className="flex items-center gap-2">
             <div className="bg-red-500 h-10 w-10"></div>
             <p>Not attempted or skipped</p>
@@ -592,7 +592,7 @@ useEffect(() => {
           !enablefullscreen ? <div className="h-screen w-full flex justify-center items-center"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
         <>
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop" onContextMenu={(e)=>e.preventDefault()}>
-          <div className=" bg-white p-2 rounded-lg shadow-md">
+          <div className=" bg-white p-2 rounded-lg shadow-md font-bold text-xl">
           Time Remaining: {formatTime(timer)}
           </div>
           <div className="font-semibold text-lg">
@@ -649,17 +649,26 @@ useEffect(() => {
               ))}
               <div className="flex justify-end space-x-2">
                 <button
-                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${index === 0 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                  onClick={() => (index > 0 ? Previousquestion() : "")}
+                >
+                  Previous
+                 
+                </button>
+                <button
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${index+1 === Length ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                  onClick={() => (index+1 < Length ? Nextquestion() : "")}
+                >
+                  Next
+                 
+                </button>
+                <button
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
                   onClick={() => !data[index]?.isSubmitted ? handleSubmit() : ""}
                 >
                   {index+1==Length ? 'Save & Submit':'Save & Next'}
                  
                 </button>
-                {/* {Length === index+1 && (
-                  <button className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white" onClick={()=>handleClick(false,'')}>
-                    Finish
-                  </button>
-                )} */}
               </div>
             </div>
           </div>
