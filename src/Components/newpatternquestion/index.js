@@ -29,6 +29,7 @@ export default function NewQuestion() {
   const audioIntervalRef = useRef(null);
   const [micblocked, setmicblocked] = useState()
   const [showalert, setshowalert] = useState(true)
+  const [assessmentname,setassessmentname]=useState()
 const [ProctoringScore,setProctoringScore]=useState({
   "mic":0,
   "webcam":0,
@@ -80,6 +81,7 @@ const [proctoringActive, setProctoringActive] = useState({
       const response = await data.json();
       if (response.success) {
         setshow(false);
+        setassessmentname(response?.Assessment?.assessmentName)
         const newProctoringActive = {};
 
     Object.keys(response?.Assessment?.ProctoringFor).forEach(key => {
@@ -228,39 +230,39 @@ const [proctoringActive, setProctoringActive] = useState({
   }
 
   async function handleClick(status,remarks) {
-    // try {
-    //   let url = `${BASE_URL}/finishAssessment`;
-    //   const data = await fetch(url, {
-    //     method: "PUT",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     body: JSON.stringify({ 
-    //       isSuspended:status,
-    //       ProctoringScore:ProctoringScore,
-    //       remarks:remarks
-    //     }),
-    //   });
-    //   const response = await data.json();
-    //   if (response.success) {
-    //     localStorage.removeItem(localStorage.getItem('assesmenttoken'))
-    //     if(status){
-    //       toast.error("Suspended!");
-    //       window.location.replace('/suspended');
-    //     }
-    //     else{
-    //       toast.success("Submitted Successfully");
-    //       window.location.replace('/submitted');
-    //     }
+    try {
+      let url = `${BASE_URL}/finishAssessment`;
+      const data = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          isSuspended:status,
+          ProctoringScore:ProctoringScore,
+          remarks:remarks
+        }),
+      });
+      const response = await data.json();
+      if (response.success) {
+        localStorage.removeItem(localStorage.getItem('assesmenttoken'))
+        if(status){
+          toast.error("Suspended!");
+          window.location.replace('/suspended');
+        }
+        else{
+          toast.success("Submitted Successfully");
+          window.location.replace('/submitted');
+        }
      
-    //   } else {
-    //     toast.error(response.message);
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   function handlePrev() {
@@ -283,42 +285,63 @@ const [proctoringActive, setProctoringActive] = useState({
   const canvasRef = useRef(null);
   const [warning, setwarning] = useState('')
   const [phoneDetected, setPhoneDetected] = useState(false);
+  const timerIntervalRef = useRef(null);
   const [timer, setTimer] = useState(() => {
     const storedTimer = localStorage.getItem(localStorage.getItem('assesmenttoken'));
-    return storedTimer ? parseInt(storedTimer) : parseInt(params.get('t'));
+    return storedTimer ? parseInt(storedTimer) : parseInt(params.get('t'))*60;
   });
   const maxVolumeRef = useRef(0);
   const allowedwarnings = 3;
 let tempstate=true;
-  const startTimer = () => {
-  
-    const timerInterval = setInterval(() => {
-      localStorage.setItem(localStorage.getItem('assesmenttoken'),timer-1)
-      setTimer(prevTimer => prevTimer - 1); // Decrease timer by 1 second
-    }, 60000); // Update timer every second
+const formatTime = (totalSeconds) => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
 
-    // Clean up the interval on unmount or timer reaching 0
-    return () => clearInterval(timerInterval);
+const startTimer = () => {
+  // Check if there's already an interval running to prevent multiple intervals
+  if (timerIntervalRef.current || !enablefullscreen) {
+    return;
+  }
+
+  timerIntervalRef.current = setInterval(() => {
+    setTimer((prevTimer) => {
+      if (prevTimer <= 0) {
+        clearInterval(timerIntervalRef.current); // Clear interval when timer reaches 0
+        timerIntervalRef.current = null;
+        openModal("Time's up");
+        localStorage.removeItem(localStorage.getItem('assesmenttoken'));
+        handleClick(true, "Time's up");
+        return 0;
+      }
+      localStorage.setItem(localStorage.getItem('assesmenttoken'), prevTimer - 1);
+      return prevTimer - 1;
+    });
+  }, 1000); // Update timer every second
+};
+
+useEffect(() => {
+  // Start the timer only when enablefullscreen is true
+  if (enablefullscreen) {
+    startTimer();
+  } else {
+    // Pause timer if fullscreen is disabled
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  }
+
+  // Cleanup function to clear the interval when the component unmounts
+  return () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
   };
-
-  useEffect(() => {
-    // console.log("hello"+timer);
-   if(timer<=0){
-    openModal("Time's up")
-    localStorage.removeItem(localStorage.getItem('assesmenttoken'))
-    handleClick(true,"Time's up"); 
-   }
-  }, [timer])
-  
-
-        useEffect(() => {
-          if(tempstate){
-           tempstate=false;
-          //  console.log("hello");
-           startTimer()
-         
-          }
-           }, [])
+}, [enablefullscreen]);
   
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -421,7 +444,7 @@ let tempstate=true;
   
           // console.log("Current volume:", volume);
   
-          if (volume > 150 && temp && showalert) {
+          if (volume > 200 && temp && showalert && peoplewarning>0) {
             openModal('You are not allowed to speak during the test.')
             temp=false;
             // console.log(peoplewarning-1);
@@ -463,7 +486,7 @@ let tempstate=true;
   }, [enablefullscreen,proctoringActive]);
 
   useEffect(() => {
-    if (phoneDetected && proctoringActive.PhoneinFrame && showalert) {
+    if (phoneDetected && proctoringActive.PhoneinFrame && showalert && peoplewarning>0) {
       openModal("Phones are not allowed during test")
       setProctoringScore(prevState => ({
         ...prevState,
@@ -507,8 +530,8 @@ let tempstate=true;
     };
   }, [enablefullscreen]);
   function handleQuestionNumber(ind){
-// setindex(ind)
-// navigate(`/question?index=${ind}&t=${params.get('t')}`)
+    setindex(ind)
+    setSelected("")
   }
   return (
     <>
@@ -555,17 +578,16 @@ let tempstate=true;
           !enablefullscreen ? <div className="h-screen w-full flex justify-center items-center"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
         <>
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop" onContextMenu={(e)=>e.preventDefault()}>
-          {/* <div onClick={handlePrev} className="flex items-center space-x-3 cursor-pointer">
-            <FaArrowLeft />
-            <p className="font-semibold">Go Back to {data[index]?.module} Module</p>
-          </div> */}
           <div className=" bg-white p-2 rounded-lg shadow-md">
-          Time Remaining: {timer} mins
+          Time Remaining: {formatTime(timer)}
+          </div>
+          <div className="font-semibold text-lg">
+          {assessmentname}
           </div>
           <div className="flex items-center space-x-3">
             <FaLessThan
               className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-              onClick={() => (index > 1 ? Previousquestion() : "")}
+              onClick={() => (index > 0 ? Previousquestion() : "")}
             />
             <FaGreaterThan
               className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index+1 === Length ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
@@ -586,13 +608,13 @@ let tempstate=true;
 
       {   
       index+1<=Length?<>
-      <div className="w-[40%] rounded-xl border h-full shadow-xl xsm:w-full">
+      <div className="w-[45%] rounded-xl border h-full shadow-xl xsm:w-full">
             <div className="border-b-[2px] p-3 font-semibold">{data[index]?.module}</div>
             <div className="p-3 text-lg text-gray-700">Q:{index+1}{") "} {data[index]?.question}</div>
           </div>
           <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit">
             <div className="border-b-[2px] p-3 font-semibold">Options</div>
-            <div className="flex flex-col p-5 gap-y-5">
+            <div className="flex flex-col p-5 gap-y-5 ">
               {data[index]?.options && Object.entries(data[index]?.options).map(([key, value]) => (
                 <label
                   key={key}
@@ -613,25 +635,34 @@ let tempstate=true;
               ))}
               <div className="flex justify-end space-x-2">
                 <button
-                  className={`py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
                   onClick={() => !data[index]?.isSubmitted ? handleSubmit() : ""}
                 >
-                  Save & Next
+                  {index+1==Length ? 'Save & Submit':'Save & Next'}
+                 
                 </button>
-                {Length === index+1 && (
+                {/* {Length === index+1 && (
                   <button className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white" onClick={()=>handleClick(false,'')}>
                     Finish
                   </button>
-                )}
+                )} */}
               </div>
             </div>
           </div>
-        <div className="w-[15%] flex flex-wrap">
-        {Array.from({ length: Length }).map((_, ind) => (
-        <div onClick={()=>setindex(ind)} key={ind} className={`border h-5 w-5 shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
-          {ind+1}
+          <div className="w-[15%] flex flex-col justify-between">
+        <div className="w-full flex flex-row flex-wrap h-fit max-h-[90%] overflow-y-auto gap-3">
+                {
+                  data?.map((item,ind)=>{
+                    return(<>
+                    <div onClick={()=>handleQuestionNumber(ind)} className={ `text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded ${index==ind ? 'bg-yellow-400 border border-white': item?.isSubmitted ? 'bg-[#1DBF73]' : 'bg-red-500'}`}>{ind+1}</div>
+                    </>)
+                  })
+                }
+                   
         </div>
-      ))}
+        <div className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg" onClick={()=>handleClick(false,'')}>
+          Submit
+        </div>
         </div>
         </>:''
       }
