@@ -94,7 +94,7 @@ const [proctoringActive, setProctoringActive] = useState({
         setLength(response?.totalQuestions);
       } else {
         toast.success(response?.message)
-        localStorage.removeItem(localStorage.getItem('assesmenttoken'))
+        localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'))
         // navigate("/submitted");
       }
     } catch (error) {
@@ -247,7 +247,7 @@ const [proctoringActive, setProctoringActive] = useState({
       });
       const response = await data.json();
       if (response.success) {
-        localStorage.removeItem(localStorage.getItem('assesmenttoken'))
+        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
         if(status){
           toast.error("Suspended!");
           window.location.replace('/suspended');
@@ -287,8 +287,8 @@ const [proctoringActive, setProctoringActive] = useState({
   const [phoneDetected, setPhoneDetected] = useState(false);
   const timerIntervalRef = useRef(null);
   const [timer, setTimer] = useState(() => {
-    const storedTimer = localStorage.getItem(localStorage.getItem('assesmenttoken'));
-    return storedTimer ? parseInt(storedTimer) : parseInt(params.get('t'))*60;
+    const storedTimer = localStorage.getItem('time'+localStorage.getItem('assessmenttoken'));
+    return  parseInt(storedTimer)*60;
   });
   const maxVolumeRef = useRef(0);
   const allowedwarnings = 3;
@@ -312,11 +312,11 @@ const startTimer = () => {
         clearInterval(timerIntervalRef.current); // Clear interval when timer reaches 0
         timerIntervalRef.current = null;
         openModal("Time's up");
-        localStorage.removeItem(localStorage.getItem('assesmenttoken'));
+        localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'));
         handleClick(true, "Time's up");
         return 0;
       }
-      localStorage.setItem(localStorage.getItem('assesmenttoken'), prevTimer - 1);
+      localStorage.setItem('time'+localStorage.getItem('assessmenttoken'), prevTimer - 1);
       return prevTimer - 1;
     });
   }, 1000); // Update timer every second
@@ -574,6 +574,20 @@ useEffect(() => {
             <canvas ref={canvasRef} width="200" height="180" className='absolute top-0' />
           </div>
         </div>
+      { enablefullscreen ? <div className="fixed bottom-10 left-[250px] flex items-center gap-5">
+          <div className="flex items-center gap-2">
+            <div className="bg-red-500 h-10 w-10"></div>
+            <p>Not attempted or skipped</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="bg-[#1DBF73] h-10 w-10"></div>
+            <p>Attempted</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="bg-yellow-400 h-10 w-10"></div>
+            <p>Active Question</p>
+          </div>
+        </div>:''}
         {
           !enablefullscreen ? <div className="h-screen w-full flex justify-center items-center"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
         <>
@@ -586,7 +600,7 @@ useEffect(() => {
           </div>
           <div className="flex items-center space-x-3">
             <FaLessThan
-              className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${index === 0 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
               onClick={() => (index > 0 ? Previousquestion() : "")}
             />
             <FaGreaterThan
@@ -597,7 +611,7 @@ useEffect(() => {
         </div>
         
         
-        <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop scrollbarnumber">
+        <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop ">
           {/* <div className="flex flex-col max-h-full overflow-y-auto gap-2 question">
           {Array.from({ length: Length }).map((_, ind) => (
         <button onClick={()=>setindex(ind)} key={ind} className={`border shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
@@ -649,8 +663,8 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <div className="w-[15%] flex flex-col justify-between">
-        <div className="w-full flex flex-row flex-wrap h-fit max-h-[90%] overflow-y-auto gap-3">
+          <div className="w-[15%] flex flex-col justify-between ">
+        <div className="w-full flex flex-row flex-wrap h-fit max-h-[90%] overflow-y-auto gap-3 scrollbarnumber">
                 {
                   data?.map((item,ind)=>{
                     return(<>

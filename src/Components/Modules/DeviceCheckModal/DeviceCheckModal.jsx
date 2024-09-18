@@ -6,7 +6,7 @@ import { BASE_URL } from "../../../Api";
 
 const DeviceCheckPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  let assessmentToken=localStorage.getItem('assesmenttoken')
+  let assessmentToken=localStorage.getItem('assessmenttoken')
   const [search,setserch]=useSearchParams()
   const [Proctoringdata, setProctoringdata] = useState([])
   const [selectedOptions, setSelectedOptions] = useState({
@@ -139,11 +139,11 @@ const navigate=useNavigate()
       const response=await data.json()
       if(response.success){
         if(isProtected){
-        window.location.replace(`/question?index=1&t=${time}`)
+        window.location.replace(`/question`)
 
         }
         else{
-        window.location.replace(`/nmquestion?index=1&t=${time}`)
+        window.location.replace(`/nmquestion`)
 
         }
       }
@@ -158,7 +158,7 @@ const navigate=useNavigate()
     async function Fetchdata() {
       try {
         setshow(true);
-        let url = BASE_URL + "/getUserAssessment?assessmentToken="+assessmentToken
+        let url = BASE_URL + "/getUserAssessment?assessmentToken="+localStorage.getItem('assessmenttoken')
         const data = await fetch(url)
         const response = await data.json();
         settime(response?.data?.timelimit)
@@ -240,7 +240,7 @@ await startMicrophone()
         return null;
     }
   };
-
+ 
   return (<>
   <Toaster/>
 
