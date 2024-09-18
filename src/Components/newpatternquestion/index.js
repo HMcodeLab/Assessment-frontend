@@ -194,9 +194,13 @@ const [proctoringActive, setProctoringActive] = useState({
           newArr[index] = { ...newArr[index], submittedAnswer: Selected,isSubmitted:true }; // Update the specific object
           return newArr; // Set the updated array
         });
+        if(index+1==Length){
+          handleClick(false,"")
+        }
         setshow(false);
         setindex((prev)=>prev+1);
         setSelected("");
+       
         // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
       }
     } catch (error) {
@@ -224,39 +228,39 @@ const [proctoringActive, setProctoringActive] = useState({
   }
 
   async function handleClick(status,remarks) {
-    try {
-      let url = `${BASE_URL}/finishAssessment`;
-      const data = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          isSuspended:status,
-          ProctoringScore:ProctoringScore,
-          remarks:remarks
-        }),
-      });
-      const response = await data.json();
-      if (response.success) {
-        localStorage.removeItem(localStorage.getItem('assesmenttoken'))
-        if(status){
-          toast.error("Suspended!");
-          window.location.replace('/suspended');
-        }
-        else{
-          toast.success("Submitted Successfully");
-          window.location.replace('/submitted');
-        }
+    // try {
+    //   let url = `${BASE_URL}/finishAssessment`;
+    //   const data = await fetch(url, {
+    //     method: "PUT",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //     body: JSON.stringify({ 
+    //       isSuspended:status,
+    //       ProctoringScore:ProctoringScore,
+    //       remarks:remarks
+    //     }),
+    //   });
+    //   const response = await data.json();
+    //   if (response.success) {
+    //     localStorage.removeItem(localStorage.getItem('assesmenttoken'))
+    //     if(status){
+    //       toast.error("Suspended!");
+    //       window.location.replace('/suspended');
+    //     }
+    //     else{
+    //       toast.success("Submitted Successfully");
+    //       window.location.replace('/submitted');
+    //     }
      
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    //   } else {
+    //     toast.error(response.message);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   function handlePrev() {
@@ -540,7 +544,7 @@ let tempstate=true;
     {
       camerablocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the camera. </div>
 : micblocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the microphone. </div> :
-      <div className="px-[6%] space-y-5 py-2 bg-white" ref={contentRef}>
+      <div className="px-[2%] space-y-5 py-2 bg-white" ref={contentRef}>
         <div className='fixed bottom-0 left-0 font-pop'>
           <div className='relative'>
             <video ref={videoRef} width="200" height="180" className='rounded-xl' style={{ display: 'block' }} />
@@ -551,10 +555,10 @@ let tempstate=true;
           !enablefullscreen ? <div className="h-screen w-full flex justify-center items-center"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
         <>
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop" onContextMenu={(e)=>e.preventDefault()}>
-          <div onClick={handlePrev} className="flex items-center space-x-3 cursor-pointer">
+          {/* <div onClick={handlePrev} className="flex items-center space-x-3 cursor-pointer">
             <FaArrowLeft />
             <p className="font-semibold">Go Back to {data[index]?.module} Module</p>
-          </div>
+          </div> */}
           <div className=" bg-white p-2 rounded-lg shadow-md">
           Time Remaining: {timer} mins
           </div>
@@ -572,15 +576,17 @@ let tempstate=true;
         
         
         <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop scrollbarnumber">
-          <div className="flex flex-col max-h-full overflow-y-auto gap-2 question">
+          {/* <div className="flex flex-col max-h-full overflow-y-auto gap-2 question">
           {Array.from({ length: Length }).map((_, ind) => (
         <button onClick={()=>setindex(ind)} key={ind} className={`border shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
           {ind+1}
         </button>
       ))}
-          </div>
+          </div> */}
 
-          <div className="w-[60%] rounded-xl border h-full shadow-xl xsm:w-full">
+      {   
+      index+1<=Length?<>
+      <div className="w-[40%] rounded-xl border h-full shadow-xl xsm:w-full">
             <div className="border-b-[2px] p-3 font-semibold">{data[index]?.module}</div>
             <div className="p-3 text-lg text-gray-700">Q:{index+1}{") "} {data[index]?.question}</div>
           </div>
@@ -610,7 +616,7 @@ let tempstate=true;
                   className={`py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
                   onClick={() => !data[index]?.isSubmitted ? handleSubmit() : ""}
                 >
-                  Save
+                  Save & Next
                 </button>
                 {Length === index+1 && (
                   <button className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white" onClick={()=>handleClick(false,'')}>
@@ -620,7 +626,16 @@ let tempstate=true;
               </div>
             </div>
           </div>
+        <div className="w-[15%] flex flex-wrap">
+        {Array.from({ length: Length }).map((_, ind) => (
+        <div onClick={()=>setindex(ind)} key={ind} className={`border h-5 w-5 shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
+          {ind+1}
         </div>
+      ))}
+        </div>
+        </>:''
+      }
+      </div>
         </>
 }
         {show && (

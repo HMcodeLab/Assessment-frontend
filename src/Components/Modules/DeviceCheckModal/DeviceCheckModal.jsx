@@ -245,26 +245,17 @@ await startMicrophone()
   <Toaster/>
 
     <div className="max-w-full h-full mx-auto p-4 md:p-8 py-8">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-row md:flex-col  xsm:flex-col sm:flex-col ">
-        {/* First Part - 40% (Fixed) */}
-        <div className="md:w-full w-full p-6 bg-gray-100 flex flex-col justify-center items-center gap-5 ">
-       {/* { !cameraworking ? <div className="w-[400px] h-[300px] border-2 shadow-lg flex justify-center items-center">
-            Camera
-         </div> :  ''} */}
-    {/* {  !micworking ?   <div className="w-[400px] h-[300px] border-2 shadow-lg flex justify-center items-center">
-            Microphone
-         </div> :''
-        } */}
+      <div className="bg-white rounded-lg shadow-lg  flex  justify-between">
+        <div className=" p-6 bg-gray-100 flex flex-col justify-center items-center gap-5 ">
+
                 <video ref={videoRef} autoPlay style={{ width: '100%', maxWidth: '400px', marginTop: '20px' }} />
                 <canvas ref={canvasRef} width="400"  style={{ marginTop: '20px'}}></canvas>
         </div>
 
-        {/* Second Part - 60% (Dynamic) */}
-        <div className="md:w-full w-full p-6 bg-white relative">
+        <div className=" p-6 bg-white  w-full ">
 
-          {/* Step Content */}
           <div className="py-4">{renderStepContent()}</div>
-         {(micworking && cameraworking )? <button className="bg-green-500 text-white rounded p-2 mx-auto" onClick={handleContinue}>Continue test</button> : ''}
+         {(micworking && cameraworking )? <div className="flex justify-center w-full"><button className="bg-green-500 text-white rounded p-2 " onClick={handleContinue}>Continue test</button></div> : ''}
 
         </div>
       </div>

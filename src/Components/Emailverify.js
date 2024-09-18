@@ -47,7 +47,7 @@ let navigate=useNavigate()
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-100 rounded-lg shadow-sm border border-gray-300 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:border-transparent transition duration-200"
-                placeholder="Enter your email"
+                placeholder="Enter your registered email"
                 required
               />
               <label
