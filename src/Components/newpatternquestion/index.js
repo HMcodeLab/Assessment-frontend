@@ -230,39 +230,39 @@ const [proctoringActive, setProctoringActive] = useState({
   }
 
   async function handleClick(status,remarks) {
-    // try {
-    //   let url = `${BASE_URL}/finishAssessment`;
-    //   const data = await fetch(url, {
-    //     method: "PUT",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     body: JSON.stringify({ 
-    //       isSuspended:status,
-    //       ProctoringScore:ProctoringScore,
-    //       remarks:remarks
-    //     }),
-    //   });
-    //   const response = await data.json();
-    //   if (response.success) {
-    //     localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-    //     if(status){
-    //       toast.error("Suspended!");
-    //       window.location.replace('/suspended');
-    //     }
-    //     else{
-    //       toast.success("Submitted Successfully");
-    //       window.location.replace('/submitted');
-    //     }
+    try {
+      let url = `${BASE_URL}/finishAssessment`;
+      const data = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          isSuspended:status,
+          ProctoringScore:ProctoringScore,
+          remarks:remarks
+        }),
+      });
+      const response = await data.json();
+      if (response.success) {
+        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+        if(status){
+          toast.error("Suspended!");
+          window.location.replace('/suspended');
+        }
+        else{
+          toast.success("Submitted Successfully");
+          window.location.replace('/submitted');
+        }
      
-    //   } else {
-    //     toast.error(response.message);
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   function handlePrev() {
@@ -683,7 +683,7 @@ useEffect(() => {
                 }
                    
         </div>
-        <div className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg" onClick={()=>handleClick(false,'')}>
+        <div className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg cursor-pointer" onClick={()=>handleClick(false,'')}>
           Submit
         </div>
         </div>
