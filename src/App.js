@@ -10,12 +10,13 @@ import Suspended from './Components/Submittedpage/suspended';
 import Normalassessment from './Components/normalassessment';
 import TestTimer from './Components/temp';
 import Watermark from './Components/temp';
+import First from './Components/Enterancepage/First';
 
 function App() {
   return (
     <BrowserRouter>
     <Routes>
-      <Route path='/' element={<EmailVerificationForm/>}/>
+      <Route path='/' element={<First/>}/>
       {/* <Route path='/instructions' element={<Instruction/>}/> */}
       {/* <Route path='/instructions' element={<Instruction/>}/> */}
       <Route path='/hardwarechecking' element={<DeviceCheckPage/>}/>
