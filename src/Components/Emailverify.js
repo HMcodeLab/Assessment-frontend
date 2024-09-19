@@ -29,7 +29,7 @@ async function Fetchdata() {
     if(response.success){
 setdata(response?.data)
 setFutureDate(new Date(response?.data?.startDate))
-localStorage.setItem('time'+assessmentToken,response?.data?.timelimit)
+localStorage.setItem('time'+assessmentToken,parseInt(response?.data?.timelimit)*60)
     }
   } catch (error) {
     

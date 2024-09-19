@@ -14,10 +14,18 @@ export default function NewQuestion() {
   const [data, setdata] = useState([]);
   const [show, setshow] = useState(false);
   const [params, setparams] = useSearchParams();
-  const [index, setindex] = useState(0);
+  const [index, setindex] = useState(()=>{
+    let storedindex=localStorage.getItem('lastindex'+localStorage.getItem('assessmenttoken'))
+    return storedindex ? parseInt(storedindex) : 0;
+  });
   const [audioAlert, setAudioAlert] = useState(false);
   const [tabwarning, settabwarning] = useState(0);
-  let [peoplewarning, setpeoplewarning] = useState(3);
+  let [peoplewarning, setpeoplewarning] = useState(
+    ()=>{
+      let storedindex=localStorage.getItem('warnings'+localStorage.getItem('assessmenttoken'))
+      return storedindex ? parseInt(storedindex) : 3;
+    }
+  );
   let navigate = useNavigate();
   const [Length, setLength] = useState(0);
   const [camerablocked, setcamerablocked] = useState()
@@ -89,8 +97,17 @@ const [proctoringActive, setProctoringActive] = useState({
     });
 // console.log(newProctoringActive);
 
-    setProctoringActive(newProctoringActive); 
-        setdata(response?.questions);
+    setProctoringActive(newProctoringActive);
+    let checkdata=localStorage.getItem('data'+localStorage.getItem('assessmenttoken')) 
+    if(checkdata){
+      console.log(checkdata,JSON.parse(checkdata));
+      
+      setdata(JSON.parse(checkdata))
+    }
+    else{
+      setdata(response?.questions);
+    }
+        
         setLength(response?.totalQuestions);
       } else {
         toast.success(response?.message)
@@ -105,6 +122,14 @@ const [proctoringActive, setProctoringActive] = useState({
   useEffect(() => {
     Fetchdata();
   }, []);
+  // let tempdata=true;/
+  // useEffect(() => {
+  //   if(data.length){
+  //     // tempdata=false;
+  //     localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(data))
+  //   }
+  // }, [index])
+  
   const loadModelAndDetect = async () => {
     const model = await cocoSsd.load();
     setcameraActive(true)
@@ -194,11 +219,17 @@ const [proctoringActive, setProctoringActive] = useState({
         setdata((prevArr) => {
           const newArr = [...prevArr]; // Create a shallow copy of the array
           newArr[index] = { ...newArr[index], submittedAnswer: Selected,isSubmitted:true }; // Update the specific object
+          localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(newArr))
+
           return newArr; // Set the updated array
         });
+        localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
+
         if(index+1==Length){
           handleClick(false,"")
+          return;
         }
+
         setshow(false);
         setindex((prev)=>prev+1);
         setSelected("");
@@ -213,7 +244,15 @@ const [proctoringActive, setProctoringActive] = useState({
   function Nextquestion() {
     if (index <= Length) {
       // Fetchdata();
-      
+      setdata((prevArr) => {
+        const newArr = [...prevArr]; // Create a shallow copy of the array
+        newArr[index] = { ...newArr[index],isVisited:true }; // Update the specific object
+        localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(newArr))
+
+        return newArr; // Set the updated array
+      });
+      localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
+
       setSelected("");
       setindex((prev)=>prev+1);
       // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
@@ -222,10 +261,16 @@ const [proctoringActive, setProctoringActive] = useState({
 
   function Previousquestion() {
     if (index >= 1) {
-      // Fetchdata();
+      setdata((prevArr) => {
+        const newArr = [...prevArr]; // Create a shallow copy of the array
+        newArr[index] = { ...newArr[index],isVisited:true }; // Update the specific object
+        localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(newArr))
+        return newArr; // Set the updated array
+      });
+      localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index-1)
+
       setSelected("");
       setindex((prev)=>prev-1);
-      // navigate(`/question?index=${index - 1}&t=${params.get('t')}`);
     }
   }
 
@@ -288,7 +333,7 @@ const [proctoringActive, setProctoringActive] = useState({
   const timerIntervalRef = useRef(null);
   const [timer, setTimer] = useState(() => {
     const storedTimer = localStorage.getItem('time'+localStorage.getItem('assessmenttoken'));
-    return  parseInt(storedTimer)*60;
+    return  parseInt(storedTimer);
   });
   const maxVolumeRef = useRef(0);
   const allowedwarnings = 3;
@@ -420,6 +465,8 @@ useEffect(() => {
   }, [personCount,enablefullscreen,showalert,cameraActive]);
 
   useEffect(() => {
+    localStorage.setItem('warnings'+localStorage.getItem('assessmenttoken'),peoplewarning)
+
       if (peoplewarning <0 && cameraActive && !camerablocked && !micblocked && enablefullscreen) {
         handleClick(true,'Cheating attempt detected during the online test. Disciplinary action will follow.');
       }
@@ -530,9 +577,18 @@ useEffect(() => {
     };
   }, [enablefullscreen]);
   function handleQuestionNumber(ind){
+    setdata((prevArr) => {
+      const newArr = [...prevArr]; // Create a shallow copy of the array
+      newArr[ind] = { ...newArr[ind],isVisited:true }; // Update the specific object
+      localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(newArr))
+      return newArr; // Set the updated array
+    });
+    localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),ind)
+
     setindex(ind)
     setSelected("")
   }
+  
   return (
     <>
     <Modal
@@ -677,7 +733,13 @@ useEffect(() => {
                 {
                   data?.map((item,ind)=>{
                     return(<>
-                    <div onClick={()=>handleQuestionNumber(ind)} className={ `text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded ${index==ind ? 'bg-yellow-400 border border-white': item?.isSubmitted ? 'bg-[#1DBF73]' : 'bg-red-500'}`}>{ind+1}</div>
+                    <div onClick={()=>handleQuestionNumber(ind)} className={ `text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
+                      ${
+                        !item?.isSubmitted && !item.isVisited ? 'bg-gray-300'
+                      :index==ind ? 'bg-yellow-400 border border-white':
+                       item?.isSubmitted ? 'bg-[#1DBF73]' : 
+                       'bg-red-500'
+                       }`}>{ind+1}</div>
                     </>)
                   })
                 }
