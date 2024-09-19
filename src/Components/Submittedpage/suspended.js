@@ -25,7 +25,7 @@ function Suspended() {
                 Phone : +91 7447732467, 356263553
               </p>
             </div>
-          </div>
+                </div>
                 {/* <div className='text-center px-20'>Thank you for participating in PAP enrollment test. You will be receiving your test results via email in 24 Hrs.</div> */}
                 {/* <div className="button-container mt-5">
                     <a href={'/'}> <button className="view-order">Back to home</button></a>

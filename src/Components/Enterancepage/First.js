@@ -218,7 +218,7 @@ function formatDate(dateString) {
 {
     continued?<div className="rounded-l-xl w-full pl-10 py-6    bg-white  boe ">
     <div className="">
-      <p className=" w-[60vw] mt-10 text-[36px] font-bold font-Poppins">
+      <p className=" w-[50vw] mt-10 text-[36px] font-bold font-Poppins">
         Here Are Few Instructions
       </p>
       <p className="text-4xl font-bold  h-10  font-Poppins">
@@ -226,7 +226,7 @@ function formatDate(dateString) {
         Before Doing The Test -
       </p>
     </div>
-    <div class="max-w-2xl  overflow-y-auto bg-white mt-10 h-80 text-justify w-[70%]">
+    <div class="max-w-2xl  overflow-y-auto bg-white mt-10 h-80 text-justify w-[100%]">
       <h1 class="text-2xl font-semibold mb-6">
         Here are the online test instructions for an AI-proctored PAP (Pay
         After Placement) Test: with additional alerts for specific
@@ -342,7 +342,7 @@ function formatDate(dateString) {
     </button>
   </div>:
 
-        <div className="rounded-l-xl w-full pl-10 py-6  bg-white  boe">
+        <div className="rounded-l-xl w-full pl-28 py-6  bg-white  boe">
           <div className="">
             <h2 className="w-115 text-[24px] font-semibold text-black font-Poppins pb-2">
               Welcome
