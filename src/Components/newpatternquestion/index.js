@@ -596,7 +596,7 @@ useEffect(() => {
   
   return (
     <>
-    <div className="relative w-full h-screen">
+    <div onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen">
       {enablefullscreen?<Watermark />:''}
       <div className="absolute top-0 bg-white" >
     <Modal
@@ -735,7 +735,7 @@ useEffect(() => {
                     return(<>
                     <div onClick={()=>handleQuestionNumber(ind)} className={ `text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
                       ${
-                        !item?.isSubmitted && !item.isVisited ? 'bg-gray-300'
+                        !item?.isSubmitted && !item.isVisited && index>0? 'bg-gray-300'
                       :index==ind ? 'bg-yellow-400 border border-white':
                        item?.isSubmitted ? 'bg-[#1DBF73]' : 
                        'bg-red-500'
