@@ -8,6 +8,7 @@ import Modal from 'react-modal';
 import { ImCross } from "react-icons/im";
 import { BASE_URL } from "../../Api";
 import Spinner from "../Spinner";
+import Watermark from "../temp";
 export default function NewQuestion() {
   const [enablefullscreen, setenablefullscreen] = useState(false)
   const [Selected, setSelected] = useState();
@@ -120,8 +121,10 @@ const [proctoringActive, setProctoringActive] = useState({
   }
 
   useEffect(() => {
-    Fetchdata();
-  }, []);
+    if(enablefullscreen){
+      Fetchdata();
+    }
+  }, [enablefullscreen]);
   // let tempdata=true;/
   // useEffect(() => {
   //   if(data.length){
@@ -293,6 +296,8 @@ const [proctoringActive, setProctoringActive] = useState({
       const response = await data.json();
       if (response.success) {
         localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+    localStorage.clear();
+
         if(status){
           toast.error("Suspended!");
           window.location.replace('/suspended');
@@ -591,6 +596,9 @@ useEffect(() => {
   
   return (
     <>
+    <div className="relative w-full h-screen">
+      {enablefullscreen?<Watermark />:''}
+      <div className="absolute top-0 bg-white" >
     <Modal
         isOpen={modalIsOpen}
         onAfterOpen={afterOpenModal}
@@ -645,7 +653,7 @@ useEffect(() => {
           </div>
         </div>:''}
         {
-          !enablefullscreen ? <div className="h-screen w-full flex justify-center items-center"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
+          !enablefullscreen ? <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  "><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
         <>
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop" onContextMenu={(e)=>e.preventDefault()}>
           <div className=" bg-white p-2 rounded-lg shadow-md font-bold text-xl">
@@ -668,14 +676,6 @@ useEffect(() => {
         
         
         <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop ">
-          {/* <div className="flex flex-col max-h-full overflow-y-auto gap-2 question">
-          {Array.from({ length: Length }).map((_, ind) => (
-        <button onClick={()=>setindex(ind)} key={ind} className={`border shadow-sm p-1 ${index==ind ? 'bg-green-500 text-white':''}`}>
-          {ind+1}
-        </button>
-      ))}
-          </div> */}
-
       {   
       index+1<=Length?<>
       <div className="w-[45%] rounded-xl border h-full shadow-xl xsm:w-full">
@@ -762,6 +762,8 @@ useEffect(() => {
       </div>
       
 }
+</div>
+</div>
 </div>
     </>
   );
