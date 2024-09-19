@@ -136,7 +136,7 @@ function formatDate(dateString) {
         const response=await data1.json()
         // console.log(response);
         if(response?.success){
-          toast.success(response?.msg)
+        //   toast.success(response?.msg)
           localStorage.setItem('USER',response.token)
           setIsSubmitted(true)
           navigate('/hardwarechecking')
@@ -146,7 +146,8 @@ function formatDate(dateString) {
         }
       
     };
-  return (
+  return (<>
+  <Toaster/>
     <div className=" bg-[#1DBF73] flex items-center justify-center p-4">
       <div className="  w-full h-[95vh]   shadow-lg flex     bg-green-100 overflow-hidden">
         <div className="h-[90%]  w-[60%]   text-white flex flex-col items-center">
@@ -420,6 +421,7 @@ function formatDate(dateString) {
 }
       </div>
     </div>
+    </>
   );
 }
 
