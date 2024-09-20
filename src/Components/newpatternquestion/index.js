@@ -9,6 +9,7 @@ import { ImCross } from "react-icons/im";
 import { BASE_URL } from "../../Api";
 import Spinner from "../Spinner";
 import Watermark from "../temp";
+import Draggable from "react-draggable";
 export default function NewQuestion() {
   const [enablefullscreen, setenablefullscreen] = useState(false)
   const [Selected, setSelected] = useState();
@@ -606,7 +607,7 @@ useEffect(() => {
         contentLabel="Warning"
         style={{
           content: {
-            width: '500px',
+            width: window?.innerWidth<480 ? '300px' :'500px',
             margin: 'auto',
             padding: '20px',
             height:'100px',
@@ -632,12 +633,24 @@ useEffect(() => {
       camerablocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the camera. </div>
 : micblocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the microphone. </div> :
       <div className="px-[2%] space-y-5 py-2 bg-white" ref={contentRef}>
-        <div className='fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0'>
-          <div className='relative'>
-            <video ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
-            <canvas ref={canvasRef} width="200" height="180" className='absolute top-0 xsm:w-24 xsm:h-20' />
+        {
+          window.innerWidth<480 ?    <Draggable>
+          <div className='fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0'>
+            <div className='relative'>
+              <video ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
+              <canvas ref={canvasRef} width="200" height="180" className='absolute top-0 xsm:w-24 xsm:h-20' />
+            </div>
           </div>
-        </div>
+          </Draggable>:
+           <div className='fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0'>
+           <div className='relative'>
+             <video ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
+             <canvas ref={canvasRef} width="200" height="180" className='absolute top-0 xsm:w-24 xsm:h-20' />
+           </div>
+         </div>
+        }
+     
+   
       { enablefullscreen ? <div className="fixed bottom-2 left-[250px] flex items-center gap-5 xsm:hidden">
           <div className="flex items-center gap-2">
             <div className="bg-red-500 h-10 w-10"></div>
