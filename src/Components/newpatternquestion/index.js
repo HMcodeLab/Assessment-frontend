@@ -633,22 +633,15 @@ useEffect(() => {
       camerablocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the camera. </div>
 : micblocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the microphone. </div> :
       <div className="px-[2%] space-y-5 py-2 bg-white" ref={contentRef}>
-        {
-          window.innerWidth<480 ?    <Draggable>
-          <div className='fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0'>
-            <div className='relative'>
-              <video ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
-              <canvas ref={canvasRef} width="200" height="180" className='absolute top-0 xsm:w-24 xsm:h-20' />
-            </div>
-          </div>
-          </Draggable>:
+
            <div className='fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0'>
            <div className='relative'>
              <video ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
              <canvas ref={canvasRef} width="200" height="180" className='absolute top-0 xsm:w-24 xsm:h-20' />
            </div>
+           
          </div>
-        }
+      
      
    
       { enablefullscreen ? <div className="fixed bottom-2 left-[250px] flex items-center gap-5 xsm:hidden">
@@ -670,7 +663,7 @@ useEffect(() => {
           </div>
         </div>:''}
         {
-          !enablefullscreen ? <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  "><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screeen to continue test</button></div>:
+          !enablefullscreen ? <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  "><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screen to continue test</button></div>:
         <>
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-5" onContextMenu={(e)=>e.preventDefault()}>
           <div className=" bg-white p-2 rounded-lg shadow-md font-bold text-xl">
