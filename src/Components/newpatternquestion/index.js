@@ -641,7 +641,7 @@ useEffect(() => {
       { enablefullscreen ? <div className="fixed bottom-2 left-[250px] flex items-center gap-5">
           <div className="flex items-center gap-2">
             <div className="bg-red-500 h-10 w-10"></div>
-            <p>Not attempted or skipped</p>
+            <p>Skipped</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="bg-[#1DBF73] h-10 w-10"></div>
@@ -650,6 +650,10 @@ useEffect(() => {
           <div className="flex items-center gap-2">
             <div className="bg-yellow-400 h-10 w-10"></div>
             <p>Active Question</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="bg-yellow-400 h-10 w-10"></div>
+            <p>Not Attempted</p>
           </div>
         </div>:''}
         {
@@ -719,8 +723,8 @@ useEffect(() => {
                  
                 </button>
                 <button
-                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${data[index]?.isSubmitted ? "cursor-not-allowed opacity-50" : ""}`}
-                  onClick={() => !data[index]?.isSubmitted ? handleSubmit() : ""}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${data[index]?.isSubmitted || !Selected? "cursor-not-allowed opacity-50" : ""}`}
+                  onClick={() => !data[index]?.isSubmitted  && Selected ? handleSubmit() : ""}
                 >
                   {index+1==Length ? 'Save & Submit':'Save & Next'}
                  
@@ -735,8 +739,9 @@ useEffect(() => {
                     return(<>
                     <div onClick={()=>handleQuestionNumber(ind)} className={ `text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
                       ${
-                        !item?.isSubmitted && !item.isVisited ? 'bg-gray-300'
-                      :index==ind ? 'bg-yellow-400 border border-white':
+                        index==ind ? 'bg-yellow-400 border border-white':
+
+                        !item?.isSubmitted && !item.isVisited ? 'bg-gray-300':
                        item?.isSubmitted ? 'bg-[#1DBF73]' : 
                        'bg-red-500'
                        }`}>{ind+1}</div>

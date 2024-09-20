@@ -16,7 +16,9 @@ function First() {
       setIsChecked(e.target.checked);
     };
     let assessmentToken= query.get('assessmenttoken')
+    // localStorage.clear()
     if(assessmentToken){
+
       localStorage.setItem('assessmenttoken',assessmentToken)
   
     }
@@ -34,9 +36,9 @@ function First() {
       const data=await fetch(BASE_URL+'/getUserAssessment?assessmentToken='+assessmentToken)
       const response=await data.json();
       if(response.success){
+        localStorage.setItem('time'+assessmentToken,parseInt(response?.data?.timelimit)*60)
   setdata(response?.data)
   setFutureDate(new Date(response?.data?.startDate))
-  localStorage.setItem('time'+assessmentToken,parseInt(response?.data?.timelimit)*60)
       }
     } catch (error) {
       
@@ -226,17 +228,17 @@ function formatDate(dateString) {
         Before Doing The Test -
       </p>
     </div>
-    <div class="max-w-2xl  overflow-y-auto bg-white mt-10 h-80 text-justify w-[100%]">
-      <h1 class="text-2xl font-semibold mb-6">
+    <div className="max-w-2xl  overflow-y-auto bg-white mt-10 h-80 text-justify w-[100%]">
+      <h1 className="text-2xl font-semibold mb-6">
         Here are the online test instructions for an AI-proctored PAP (Pay
         After Placement) Test: with additional alerts for specific
         behaviour
       </h1>
 
-      <h2 class="text-xl font-bold text-green-600 mb-4">
+      <h2 className="text-xl font-bold text-green-600 mb-4">
         Getting Ready:
       </h2>
-      <ul class="list-disc list-inside text-lg space-y-2">
+      <ul className="list-disc list-inside text-lg space-y-2">
         <li>
           Ensure you have a working webcam and microphone connected to
           your computer.
@@ -250,20 +252,20 @@ function formatDate(dateString) {
         </li>
       </ul>
 
-      <h2 class="text-xl font-bold text-green-600 mt-8 mb-4">
+      <h2 className="text-xl font-bold text-green-600 mt-8 mb-4">
         Launching the Test:
       </h2>
-      <ol class="list-decimal list-inside text-lg space-y-2">
+      <ol className="list-decimal list-inside text-lg space-y-2">
         <li>Log into the test portal using the provided credentials.</li>
         <li>
           Follow the instructions to launch the AI proctoring software.
         </li>
       </ol>
 
-      <h2 class="text-xl font-bold text-green-600 mt-8 mb-4">
+      <h2 className="text-xl font-bold text-green-600 mt-8 mb-4">
         During the Test:
       </h2>
-      <ol class="list-decimal list-inside text-lg space-y-2">
+      <ol className="list-decimal list-inside text-lg space-y-2">
         <li>
           The AI proctor will continuously monitor you via webcam and
           microphone.
@@ -275,8 +277,8 @@ function formatDate(dateString) {
         <li>The AI will flag any suspicious behaviour for review</li>
       </ol>
 
-      <h2 class="text-xl font-bold text-green-600 mb-4">Alerts:</h2>
-      <ol class="list-decimal list-inside text-lg space-y-2">
+      <h2 className="text-xl font-bold text-green-600 mb-4">Alerts:</h2>
+      <ol className="list-decimal list-inside text-lg space-y-2">
         <li>
           3 Times Alert: If you leave the testing area or look away from
           the screen for an extended period, you will receive an alert.
@@ -313,14 +315,14 @@ function formatDate(dateString) {
         </li>
       </ol>
 
-      {/* <div class="mt-6 flex items-start">
+      {/* <div className="mt-6 flex items-start">
         <input
           type="checkbox"
           className="form-checkbox h-5 w-5 text-green-600"
           checked={isChecked}
           onChange={handleCheckboxChange}
         />
-        <label for="agree" class="text-lg">
+        <label for="agree" className="text-lg">
           I declare that I have read and understood the instructions, and
           I agree to abide by the rules.
         </label>
@@ -328,7 +330,7 @@ function formatDate(dateString) {
 
       <button
         disabled={!isChecked}
-        class="mt-6 bg-green-500 text-white py-2 px-6 rounded hover:bg-green-600"
+        className="mt-6 bg-green-500 text-white py-2 px-6 rounded hover:bg-green-600"
       >
         {isChecked ? "Ready to Begin" : " "}
       </button> */}
@@ -356,51 +358,46 @@ function formatDate(dateString) {
             </p>
           </div>
 
-          <div class="relative w-[561px]  mt-12">
-            <input
-              class="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)] "
-              type="text"
-              value={data?.userAccess?.name}
-              readOnly
-            />
-
-            <label class="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
+          <div className="relative w-[561px]  mt-12">
+            <div
+              className="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)] ">{data?.userAccess?.name}</div>
+            <label className="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
               Name
             </label>
           </div>
-          <div class="relative w-[561px]  mt-5">
+          <div className="relative w-[561px]  mt-5">
             <input
-              class="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
+              className="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
               type="text"
               value={data?.userAccess?.phone_number}
               readOnly
             />
 
-            <label class="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
+            <label className="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
               Phone Number
             </label>
           </div>
-          <div class="relative w-[561px]  mt-5">
+          <div className="relative w-[561px]  mt-5">
             <input
-              class="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
+              className="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
               type="text"
               value={data?.userAccess?.college_name}
               readOnly
             />
 
-            <label class="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
+            <label className="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
               College name
             </label>
           </div>
-          <div class="relative w-[561px] flex mt-5">
+          <div className="relative w-[561px] flex mt-5">
             <input
-              class="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
+              className="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
               type="text"
               value={data?.userAccess?.email}
               readOnly
             />
 
-            <label class="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
+            <label className="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
               Email
             </label>
           </div>

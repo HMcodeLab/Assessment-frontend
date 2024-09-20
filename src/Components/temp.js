@@ -4,7 +4,7 @@ const Watermark = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Watermark layer */}
-      <div className="absolute inset-0 flex flex-wrap justify-center items-center opacity-5 pointer-events-none z-50">
+      <div className="absolute inset-0 flex flex-wrap justify-center items-center opacity-10 pointer-events-none z-50">
         {Array(50).fill().map((_, i) => (
           <div
             key={i}
