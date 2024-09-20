@@ -652,7 +652,7 @@ useEffect(() => {
             <p>Active Question</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="bg-yellow-400 h-10 w-10"></div>
+            <div className="bg-slate-300 h-10 w-10"></div>
             <p>Not Attempted</p>
           </div>
         </div>:''}
