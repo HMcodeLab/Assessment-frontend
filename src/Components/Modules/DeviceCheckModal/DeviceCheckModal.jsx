@@ -245,11 +245,11 @@ await startMicrophone()
   <Toaster/>
 
     <div className="max-w-full h-full mx-auto p-4 md:p-8 py-8">
-      <div className="bg-white rounded-lg shadow-lg  flex  justify-between">
+      <div className="bg-white rounded-lg shadow-lg  flex  justify-between xsm:flex-col">
         <div className=" p-6 bg-gray-100 flex flex-col justify-center items-center gap-5 ">
 
-                <video ref={videoRef} autoPlay style={{ width: '100%', maxWidth: '400px', marginTop: '20px' }} />
-                <canvas ref={canvasRef} width="400"  style={{ marginTop: '20px'}}></canvas>
+                <video  ref={videoRef} autoPlay style={{ width: '100%', maxWidth: '400px', marginTop: '20px' }} />
+                <canvas  ref={canvasRef}  style={{width: '100%', maxWidth: '400px',marginTop: '20px'}}></canvas>
         </div>
 
         <div className=" p-6 bg-white  w-full ">

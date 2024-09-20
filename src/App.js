@@ -11,12 +11,13 @@ import Normalassessment from './Components/normalassessment';
 import TestTimer from './Components/temp';
 import Watermark from './Components/temp';
 import First from './Components/Enterancepage/First';
+import TestApp from './Components/Enterancepage/AssessmentPage';
 
 function App() {
   return (
     <BrowserRouter>
     <Routes>
-      <Route path='/' element={<First/>}/>
+      <Route path='/' element={<TestApp/>}/>
       {/* <Route path='/instructions' element={<Instruction/>}/> */}
       {/* <Route path='/instructions' element={<Instruction/>}/> */}
       <Route path='/hardwarechecking' element={<DeviceCheckPage/>}/>
