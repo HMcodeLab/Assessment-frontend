@@ -18,10 +18,7 @@ export default function NewQuestion() {
   const [show, setshow] = useState(false);
   const [params, setparams] = useSearchParams();
   const screenshotRef = useRef();
-  const [screenshots, setScreenshots] = useState(()=>{
-    let tempdata=localStorage.getItem('screenshots'+localStorage.getItem('assessmenttoken'))
-    return tempdata ? JSON.parse(tempdata):[];
-  });
+  const [screenshots, setScreenshots] = useState([]);
   const [index, setindex] = useState(()=>{
     let storedindex=localStorage.getItem('lastindex'+localStorage.getItem('assessmenttoken'))
     return storedindex ? parseInt(storedindex) : 0;
@@ -299,22 +296,25 @@ function enterFullScreen() {
 
   async function handleClick(status,remarks) {
     console.log(screenshots);
+    let formdata=new FormData()
+    formdata.append('isSuspended',status)
+    formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
+    formdata.append('remarks',remarks)
     
+    const filesArray = [];
+    screenshots.forEach((blob, index) => {
+      const file = new File([blob], `screenshot_${index}.png`, { type: 'image/png' });
+      formdata.append('userScreenshots', file);
+    });
     try {
       let url = `${BASE_URL}/finishAssessment`;
       const data = await fetch(url, {
         method: "PUT",
         headers: {
           Accept: "application/json",
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
-          isSuspended:status,
-          ProctoringScore:ProctoringScore,
-          remarks:remarks,
-          userScreenshots:[]
-        }),
+        body: formdata,
       });
       const response = await data.json();
       if (response.success) {
@@ -635,22 +635,33 @@ useEffect(() => {
 
   // Function to capture the screenshot and store it in the state
   const captureScreenshot = () => {
-    const element = contentRef.current;
-
+    const element = contentRef.current; // Reference to the element you want to capture
+    
     html2canvas(element, {
       useCORS: true,
-      scale: 2,
-      // Adjust the height and width if necessary
+      scale: 1, // Reduce the scale to 1 or lower for lower resolution
       width: window.innerWidth,
       height: window.innerHeight,
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-
-      // Add the captured screenshot to the state
-      localStorage.setItem('screenshots'+localStorage.getItem('assessmenttoken'),JSON.stringify([...screenshots,imgData]))
-      setScreenshots((prevScreenshots) => [...prevScreenshots, imgData]);
+    })
+    .then((canvas) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          // Compress by converting to JPEG with reduced quality
+          const compressedBlob = new Blob([blob], { type: 'image/jpeg' });
+          const key = `screenshots${localStorage.getItem('assessmenttoken')}`;
+          
+          // Store compressed screenshot in the state
+          const updatedScreenshots = [...screenshots, compressedBlob];
+          localStorage.setItem(key, JSON.stringify(updatedScreenshots));
+          setScreenshots(updatedScreenshots); // Store blob in state
+        }
+      }, 'image/jpeg', 0.7); // '0.7' is the image quality (lower for more compression)
+    })
+    .catch((error) => {
+      console.error("Error capturing screenshot:", error);
     });
   };
+  
 
   return (
     <>
@@ -693,7 +704,7 @@ useEffect(() => {
 
            <div className='fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0'>
            <div className='relative'>
-             <video ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
+             <video playsInline controls={false} ref={videoRef} width="200" height="180" className='rounded-xl xsm:w-24 xsm:h-20' style={{ display: 'block' }} />
              <canvas ref={canvasRef} width="200" height="180" className='absolute top-0 xsm:w-24 xsm:h-20' />
            </div>
            
