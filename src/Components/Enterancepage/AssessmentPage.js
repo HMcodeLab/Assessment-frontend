@@ -140,8 +140,8 @@ const AssessmentPage = ({ onContinue,data }) => {
             <div className="flex">
                 <button
                     type="button"
-                    className="bg-[rgba(29,191,115,1)] text-white px-6 py-2 rounded-lg h-[60px] w-[575px]" // Set a fixed width
-                    onClick={onContinue}
+                    className={`bg-[rgba(29,191,115,1)] text-white px-6 py-2 rounded-lg h-[60px] w-[575px] ${new Date() > new Date(data?.startDate) && new Date() < new Date(data?.lastDate)? '':'cursor-not-allowed opacity-50'}`} // Set a fixed width
+                    onClick={()=>new Date() > new Date(data?.startDate) && new Date() < new Date(data?.lastDate) ? onContinue():''}
                 >
                     Continue To Test
                     <span className="ml-2">→</span>
