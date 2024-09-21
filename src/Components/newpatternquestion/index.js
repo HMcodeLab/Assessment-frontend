@@ -78,14 +78,9 @@ function enterFullScreen() {
           console.error("Error attempting to enable full-screen mode:", err.message);
         });
     } else if (element.webkitRequestFullscreen) { // For iOS and Safari
-      element.webkitRequestFullscreen()
-        .then(() => {
-          console.log("Entered full-screen mode successfully on iOS.");
-          setenablefullscreen(true);
-        })
-        .catch((err) => {
-          console.error("Error attempting to enable full-screen mode on iOS:", err.message);
-        });
+      setenablefullscreen(true);
+
+       
     } else {
       console.warn("Fullscreen API is not supported on this browser.");
     }
