@@ -18,3 +18,8 @@ code {
 .scrollbarnumber::-webkit-scrollbar{
   width: 0px;
 }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Hide buttons in Chrome, Safari, and Edge */
+    margin: 0; /* Remove any margin */
+}

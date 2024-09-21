@@ -12,6 +12,8 @@ import TestTimer from './Components/temp';
 import Watermark from './Components/temp';
 import First from './Components/Enterancepage/First';
 import TestApp from './Components/Enterancepage/AssessmentPage';
+import ScreenshotTest from './Components/screenshot';
+import FeedbackForm from './Components/Contactus';
 
 function App() {
   return (
@@ -25,7 +27,8 @@ function App() {
       <Route path='/submitted' element={<Submittedassessment/>}/>
       <Route path='/suspended' element={<Suspended/>}/>
       <Route path='/nmquestion' element={<Normalassessment/>}/>
-      <Route path='/temp' element={<Watermark/>}/>
+      <Route path='/temp' element={<ScreenshotTest/>}/>
+      <Route path='/contactus' element={<FeedbackForm/>}/>
     </Routes>
     </BrowserRouter>
   );

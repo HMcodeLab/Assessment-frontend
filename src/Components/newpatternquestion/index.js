@@ -9,13 +9,19 @@ import { ImCross } from "react-icons/im";
 import { BASE_URL } from "../../Api";
 import Spinner from "../Spinner";
 import Watermark from "../temp";
-import Draggable from "react-draggable";
+import html2canvas from 'html2canvas';
+
 export default function NewQuestion() {
   const [enablefullscreen, setenablefullscreen] = useState(false)
   const [Selected, setSelected] = useState();
   const [data, setdata] = useState([]);
   const [show, setshow] = useState(false);
   const [params, setparams] = useSearchParams();
+  const screenshotRef = useRef();
+  const [screenshots, setScreenshots] = useState(()=>{
+    let tempdata=localStorage.getItem('screenshots'+localStorage.getItem('assessmenttoken'))
+    return tempdata ? JSON.parse(tempdata):[];
+  });
   const [index, setindex] = useState(()=>{
     let storedindex=localStorage.getItem('lastindex'+localStorage.getItem('assessmenttoken'))
     return storedindex ? parseInt(storedindex) : 0;
@@ -58,25 +64,36 @@ const [proctoringActive, setProctoringActive] = useState({
 });
 
 
-  function enterFullScreen() {
-    if (document.fullscreenEnabled) {
-      const element = document.documentElement; // or any specific element
-      if (element.requestFullscreen) {
-        element.requestFullscreen()
-          .then(() => {
-            console.log("Entered full-screen mode successfully.");
-            setenablefullscreen(true)
-          })
-          .catch((err) => {
-            console.error("Error attempting to enable full-screen mode:", err.message);
-          });
-      } else {
-        console.warn("Fullscreen API is not supported on this browser.");
-      }
+function enterFullScreen() {
+  const element = document.documentElement; // or any specific element
+
+  if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
+    if (element.requestFullscreen) {
+      element.requestFullscreen()
+        .then(() => {
+          console.log("Entered full-screen mode successfully.");
+          setenablefullscreen(true);
+        })
+        .catch((err) => {
+          console.error("Error attempting to enable full-screen mode:", err.message);
+        });
+    } else if (element.webkitRequestFullscreen) { // For iOS and Safari
+      element.webkitRequestFullscreen()
+        .then(() => {
+          console.log("Entered full-screen mode successfully on iOS.");
+          setenablefullscreen(true);
+        })
+        .catch((err) => {
+          console.error("Error attempting to enable full-screen mode on iOS:", err.message);
+        });
     } else {
-      console.warn("Fullscreen mode is not allowed.");
+      console.warn("Fullscreen API is not supported on this browser.");
     }
+  } else {
+    console.warn("Fullscreen mode is not allowed.");
   }
+}
+
 
   async function Fetchdata() {
     try {
@@ -155,6 +172,8 @@ const [proctoringActive, setProctoringActive] = useState({
       if (err.name === 'NotAllowedError' || err.name === 'NotFoundError') {
         setcamerablocked(true)
         openModal("You can't block the camera.Give access to camera manually")
+        captureScreenshot()
+
         setProctoringScore(prevState => ({
           ...prevState,
           webcam: prevState.webcam + 1, 
@@ -228,15 +247,17 @@ const [proctoringActive, setProctoringActive] = useState({
           return newArr; // Set the updated array
         });
         localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
-
-        // if(index+1==Length){
-        //   handleClick(false,"")
-        //   return;
-        // }
-
         setshow(false);
-        setindex((prev)=>prev+1);
         setSelected("");
+
+        if(index+1==Length){
+          // handleClick(false,"")
+          
+          return;
+        }
+
+      
+        setindex((prev)=>prev+1);
        
         // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
       }
@@ -279,6 +300,8 @@ const [proctoringActive, setProctoringActive] = useState({
   }
 
   async function handleClick(status,remarks) {
+    console.log(screenshots);
+    
     try {
       let url = `${BASE_URL}/finishAssessment`;
       const data = await fetch(url, {
@@ -291,7 +314,8 @@ const [proctoringActive, setProctoringActive] = useState({
         body: JSON.stringify({ 
           isSuspended:status,
           ProctoringScore:ProctoringScore,
-          remarks:remarks
+          remarks:remarks,
+          userScreenshots:[]
         }),
       });
       const response = await data.json();
@@ -363,6 +387,8 @@ const startTimer = () => {
         clearInterval(timerIntervalRef.current); // Clear interval when timer reaches 0
         timerIntervalRef.current = null;
         openModal("Time's up");
+        captureScreenshot()
+
         localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'));
         handleClick(true, "Time's up");
         return 0;
@@ -400,6 +426,8 @@ useEffect(() => {
         document.title = "Don't change the tab";
         if (peoplewarning > 0 && enablefullscreen && showalert) {
           openModal('You are not allowed to change the tab.')
+          captureScreenshot()
+
           setpeoplewarning((prev)=>prev-1);
           setProctoringScore(prevState => ({
             ...prevState,
@@ -444,6 +472,8 @@ useEffect(() => {
     if (personCount > 1) {
       if(peoplewarning>=0 && cameraActive && showalert){
         openModal(`Warning!! ${personCount} Person Detected in your camera frame.`)
+        captureScreenshot()
+
         setProctoringScore(prevState => ({
           ...prevState,
           multiplePersonInFrame: prevState.multiplePersonInFrame + 1, 
@@ -457,6 +487,8 @@ useEffect(() => {
     // openModal("i m in")
     if(peoplewarning>=0  && showalert){
       openModal(`Warning!! Your face should be clearly visible infront of camera.`)
+      captureScreenshot()
+
       setpeoplewarning((prev)=>prev-1);
       setPersonCount(-1)
       setProctoringScore(prevState => ({
@@ -499,6 +531,8 @@ useEffect(() => {
   
           if (volume > 200 && temp && showalert && peoplewarning>0) {
             openModal('You are not allowed to speak during the test.')
+            captureScreenshot()
+
             temp=false;
             // console.log(peoplewarning-1);
             
@@ -525,7 +559,8 @@ useEffect(() => {
           // setcamerablocked(true)
           setmicblocked(true)
           openModal("You can't block the microphone.Give access to microphone manually")
-          
+          captureScreenshot()
+
         }
       }
     }
@@ -541,6 +576,8 @@ useEffect(() => {
   useEffect(() => {
     if (phoneDetected && proctoringActive.PhoneinFrame && showalert && peoplewarning>0) {
       openModal("Phones are not allowed during test")
+      captureScreenshot()
+
       setProctoringScore(prevState => ({
         ...prevState,
         PhoneinFrame: prevState.PhoneinFrame + 1, 
@@ -568,10 +605,12 @@ useEffect(() => {
   }
   useEffect(() => {
     const handleFullScreenChange = (e) => {
-      if (!document.fullscreenElement) {
+      if (!document.fullscreenElement && peoplewarning>0) {
         enterFullScreen()
         setpeoplewarning((prev)=>prev-1);
         openModal("You cant't exist full screen")
+        captureScreenshot()
+
       }
     };
 
@@ -594,10 +633,30 @@ useEffect(() => {
     setindex(ind)
     setSelected("")
   }
-  
+
+
+  // Function to capture the screenshot and store it in the state
+  const captureScreenshot = () => {
+    const element = contentRef.current;
+
+    html2canvas(element, {
+      useCORS: true,
+      scale: 2,
+      // Adjust the height and width if necessary
+      width: window.innerWidth,
+      height: window.innerHeight,
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+
+      // Add the captured screenshot to the state
+      localStorage.setItem('screenshots'+localStorage.getItem('assessmenttoken'),JSON.stringify([...screenshots,imgData]))
+      setScreenshots((prevScreenshots) => [...prevScreenshots, imgData]);
+    });
+  };
+
   return (
     <>
-    <div onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen xsm:h-full">
+    <div ref={screenshotRef} onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen xsm:h-full">
       {enablefullscreen?<Watermark />:''}
       <div className="absolute top-0 bg-white" >
     <Modal
