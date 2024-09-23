@@ -20,15 +20,11 @@ function App() {
     <BrowserRouter>
     <Routes>
       <Route path='/' element={<TestApp/>}/>
-      {/* <Route path='/instructions' element={<Instruction/>}/> */}
-      {/* <Route path='/instructions' element={<Instruction/>}/> */}
       <Route path='/hardwarechecking' element={<DeviceCheckPage/>}/>
       <Route path='/question' element={<NewQuestion/>}/>
       <Route path='/submitted' element={<Submittedassessment/>}/>
       <Route path='/suspended' element={<Suspended/>}/>
       <Route path='/nmquestion' element={<Normalassessment/>}/>
-      <Route path='/temp' element={<ScreenshotTest/>}/>
-      <Route path='/contactus' element={<FeedbackForm/>}/>
     </Routes>
     </BrowserRouter>
   );

@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BASE_URL } from "../../Api";
+import Spinner from '../Spinner';
 // Instructions Component
 const Instructions = ({handleSubmit}) => {
     const [isChecked, setIsChecked] = useState(false);
@@ -156,15 +157,13 @@ const AssessmentPage = ({ onContinue,data }) => {
 // Parent Component for merging both
 const TestApp = () => {
     const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
-
+const [show, setshow] = useState(false)
     const handleContinue = () => {
         setIsAssessmentComplete(true);
     };
-    const [email, setEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [query,setquery]=useSearchParams()
     const [data, setdata] = useState()
-    const [continued, setcontinued] = useState(false)
     const [isChecked, setIsChecked] = useState(false);
 
     const handleCheckboxChange = (e) => {
@@ -183,23 +182,29 @@ const TestApp = () => {
     // Timer state
     const [timer, setTimer] = useState(0);
     const timerIntervalRef = useRef(null);
-  
+  let temp=true;
   useEffect(() => {
   
   async function Fetchdata() {
     try {
+        setshow(true)
       const data=await fetch(BASE_URL+'/getUserAssessment?assessmentToken='+assessmentToken)
       const response=await data.json();
       if(response.success){
         localStorage.setItem('time'+assessmentToken,parseInt(response?.data?.timelimit)*60)
+        localStorage.setItem('protected'+assessmentToken,response?.data?.isProtected)
   setdata(response?.data)
   setFutureDate(new Date(response?.data?.startDate))
+  setshow(false)
       }
     } catch (error) {
       
     }
   }
-  Fetchdata()
+  if(temp){
+    Fetchdata()
+    temp=false;
+  }
   }, [])
   
   const calculateDuration = (futureDate) => {
@@ -307,6 +312,8 @@ function formatDate(dateString) {
 
                 {/* Left Section */}
                 <div className="w-full lg:w-1/3 bg-[rgba(29,191,115,0.25)] p-8 flex flex-col justify-between">
+                   
+                   
                     {
                         timer!==0 ?  <div>
                         <h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">Your Test Will Be Live in</h2>
@@ -381,6 +388,11 @@ function formatDate(dateString) {
                     )}
                 </div>
             </div>
+            {show && (
+          <div className="w-full h-screen fixed top-0 left-0 bg-[#b4cca1] opacity-80">
+            <Spinner />
+          </div>
+        )}
         </div>
     );
 };

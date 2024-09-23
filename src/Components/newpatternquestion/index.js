@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { FaArrowLeft, FaGreaterThan, FaLessThan } from "react-icons/fa";
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { json, useNavigate, useSearchParams } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import Modal from 'react-modal';
 import { ImCross } from "react-icons/im";
@@ -10,7 +10,17 @@ import { BASE_URL } from "../../Api";
 import Spinner from "../Spinner";
 import Watermark from "../temp";
 import html2canvas from 'html2canvas';
+const base64ToBlob = (base64, contentType = 'image/jpeg') => {
+  const byteCharacters = atob(base64.split(',')[1]);
+  const byteNumbers = new Array(byteCharacters.length);
 
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: contentType });
+};
 export default function NewQuestion() {
   const [enablefullscreen, setenablefullscreen] = useState(false)
   const [Selected, setSelected] = useState();
@@ -18,7 +28,19 @@ export default function NewQuestion() {
   const [show, setshow] = useState(false);
   const [params, setparams] = useSearchParams();
   const screenshotRef = useRef();
-  const [screenshots, setScreenshots] = useState([]);
+  const [screenshots, setScreenshots] = useState(() => {
+    const key = `screenshots${localStorage.getItem('assessmenttoken')}`;
+    const storedScreenshots = localStorage.getItem(key);
+
+    if (storedScreenshots) {
+      // Convert base64 strings back to Blob objects if data exists
+      const parsedScreenshots = JSON.parse(storedScreenshots);
+      return parsedScreenshots.map(base64 => base64ToBlob(base64));
+    }
+
+    // If no screenshots found, initialize state with an empty array
+    return [];
+  });
   const [index, setindex] = useState(()=>{
     let storedindex=localStorage.getItem('lastindex'+localStorage.getItem('assessmenttoken'))
     return storedindex ? parseInt(storedindex) : 0;
@@ -59,7 +81,14 @@ const [proctoringActive, setProctoringActive] = useState({
   PhoneinFrame: false,
   SoundCaptured: false
 });
-
+const blobToBase64 = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 function enterFullScreen() {
   const element = document.documentElement; // or any specific element
@@ -166,8 +195,9 @@ function enterFullScreen() {
       // console.error('Error accessing camera:', err);
       if (err.name === 'NotAllowedError' || err.name === 'NotFoundError') {
         setcamerablocked(true)
-        openModal("You can't block the camera.Give access to camera manually")
         captureScreenshot()
+        openModal("You can't block the camera.Give access to camera manually")
+        
 
         setProctoringScore(prevState => ({
           ...prevState,
@@ -216,24 +246,24 @@ function enterFullScreen() {
 
 
   const handleSubmit = async () => {
-    try {
-      let url = `${BASE_URL}/submitAnswerForAssessment`;
-      setshow(true);
-      const data1 = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          index:index+1,
-          answer: Selected
+    // try {
+      // let url = `${BASE_URL}/submitAnswerForAssessment`;
+      // setshow(true);
+      // const data1 = await fetch(url, {
+      //   method: "PUT",
+      //   headers: {
+      //     Accept: "application/json",
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({
+      //     index:index+1,
+      //     answer: Selected
           
-        }),
-      });
-      const response = await data1.json();
-      if (response.success) {
+      //   }),
+      // });
+      // const response = await data1.json();
+      // if (response.success) {
         setdata((prevArr) => {
           const newArr = [...prevArr]; // Create a shallow copy of the array
           newArr[index] = { ...newArr[index], submittedAnswer: Selected,isSubmitted:true }; // Update the specific object
@@ -243,11 +273,18 @@ function enterFullScreen() {
         });
         localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
         setshow(false);
-        setSelected("");
+        if(data[index+1]?.markForReview){
+          setSelected(data[index+1]?.submittedAnswer)
+        }
+        else{
+          setSelected("");
+        
+        }
 
         if(index+1==Length){
           // handleClick(false,"")
-          
+          setindex(0)
+
           return;
         }
 
@@ -255,14 +292,12 @@ function enterFullScreen() {
         setindex((prev)=>prev+1);
        
         // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+      
+   
   };
 
   function Nextquestion() {
-    if (index <= Length) {
+    if (index < Length) {
       // Fetchdata();
       setdata((prevArr) => {
         const newArr = [...prevArr]; // Create a shallow copy of the array
@@ -272,8 +307,13 @@ function enterFullScreen() {
         return newArr; // Set the updated array
       });
       localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
+if(data[index]?.markForReview){
+  setSelected(data[index]?.submittedAnswer)
+}
+else{
+  setSelected("");
 
-      setSelected("");
+}
       setindex((prev)=>prev+1);
       // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
     }
@@ -289,21 +329,36 @@ function enterFullScreen() {
       });
       localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index-1)
 
-      setSelected("");
+      if(data[index-1]?.markForReview){
+        setSelected(data[index-1]?.submittedAnswer)
+      }
+      else{
+        setSelected("");
+      
+      }
       setindex((prev)=>prev-1);
     }
   }
 
   async function handleClick(status,remarks) {
-    console.log(screenshots);
+    // console.log(screenshots);
+    setshow(true)
     let formdata=new FormData()
     formdata.append('isSuspended',status)
     formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
     formdata.append('remarks',remarks)
-    
-    const filesArray = [];
+    const filteredQuestions = data
+  .filter(question => question.isSubmitted) 
+  .map((question, index) => ({
+    index: index + 1,  
+    answer: question.submittedAnswer  
+  }));
+  formdata.append('answers',JSON.stringify(filteredQuestions))
+  console.log(filteredQuestions);
+  
+    // const filesArray = [];
     screenshots.forEach((blob, index) => {
-      const file = new File([blob], `screenshot_${index}.png`, { type: 'image/png' });
+      const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
       formdata.append('userScreenshots', file);
     });
     try {
@@ -318,6 +373,7 @@ function enterFullScreen() {
       });
       const response = await data.json();
       if (response.success) {
+        setshow(false)
         localStorage.removeItem(localStorage.getItem('assessmenttoken'))
     localStorage.clear();
 
@@ -384,8 +440,9 @@ const startTimer = () => {
       if (prevTimer <= 0) {
         clearInterval(timerIntervalRef.current); // Clear interval when timer reaches 0
         timerIntervalRef.current = null;
-        openModal("Time's up");
         captureScreenshot()
+        openModal("Time's up");
+        
 
         localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'));
         handleClick(true, "Time's up");
@@ -423,8 +480,9 @@ useEffect(() => {
       if (document.hidden && proctoringActive.TabSwitch) {
         document.title = "Don't change the tab";
         if (peoplewarning > 0 && enablefullscreen && showalert) {
-          openModal('You are not allowed to change the tab.')
           captureScreenshot()
+          openModal('You are not allowed to change the tab.')
+         
 
           setpeoplewarning((prev)=>prev-1);
           setProctoringScore(prevState => ({
@@ -469,8 +527,9 @@ useEffect(() => {
    if(proctoringActive.multiplePersonInFrame){
     if (personCount > 1) {
       if(peoplewarning>=0 && cameraActive && showalert){
-        openModal(`Warning!! ${personCount} Person Detected in your camera frame.`)
         captureScreenshot()
+        openModal(`Warning!! ${personCount} Person Detected in your camera frame.`)
+        
 
         setProctoringScore(prevState => ({
           ...prevState,
@@ -484,8 +543,9 @@ useEffect(() => {
    if (personCount === 0 && cameraActive && proctoringActive.webcam ) {
     // openModal("i m in")
     if(peoplewarning>=0  && showalert){
-      openModal(`Warning!! Your face should be clearly visible infront of camera.`)
       captureScreenshot()
+      openModal(`Warning!! Your face should be clearly visible infront of camera.`)
+      
 
       setpeoplewarning((prev)=>prev-1);
       setPersonCount(-1)
@@ -528,8 +588,9 @@ useEffect(() => {
           // console.log("Current volume:", volume);
   
           if (volume > 200 && temp && showalert && peoplewarning>0) {
-            openModal('You are not allowed to speak during the test.')
             captureScreenshot()
+            openModal('You are not allowed to speak during the test.')
+            
 
             temp=false;
             // console.log(peoplewarning-1);
@@ -556,8 +617,9 @@ useEffect(() => {
         if (err.name === 'NotAllowedError' || err.name === 'NotFoundError') {
           // setcamerablocked(true)
           setmicblocked(true)
-          openModal("You can't block the microphone.Give access to microphone manually")
           captureScreenshot()
+          openModal("You can't block the microphone.Give access to microphone manually")
+          
 
         }
       }
@@ -573,8 +635,9 @@ useEffect(() => {
 
   useEffect(() => {
     if (phoneDetected && proctoringActive.PhoneinFrame && showalert && peoplewarning>0) {
-      openModal("Phones are not allowed during test")
       captureScreenshot()
+      openModal("Phones are not allowed during test")
+     
 
       setProctoringScore(prevState => ({
         ...prevState,
@@ -629,39 +692,60 @@ useEffect(() => {
     localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),ind)
 
     setindex(ind)
-    setSelected("")
-  }
+    if(data[ind]?.markForReview){
+      setSelected(data[ind]?.submittedAnswer)
+    }
+    else{
+      setSelected("");
+    
+    }  }
 
 
   // Function to capture the screenshot and store it in the state
   const captureScreenshot = () => {
-    const element = contentRef.current; // Reference to the element you want to capture
-    
+    const element = contentRef.current;
+
     html2canvas(element, {
       useCORS: true,
-      scale: 1, // Reduce the scale to 1 or lower for lower resolution
-      width: window.innerWidth,
-      height: window.innerHeight,
-    })
-    .then((canvas) => {
-      canvas.toBlob((blob) => {
+      scale: 1,
+      height:window.innerHeight,
+      width:window.innerWidth
+    }).then(async (canvas) => {
+      canvas.toBlob(async (blob) => {
         if (blob) {
-          // Compress by converting to JPEG with reduced quality
-          const compressedBlob = new Blob([blob], { type: 'image/jpeg' });
+          // Convert Blob to base64
+          const base64 = await blobToBase64(blob);
           const key = `screenshots${localStorage.getItem('assessmenttoken')}`;
-          
-          // Store compressed screenshot in the state
-          const updatedScreenshots = [...screenshots, compressedBlob];
-          localStorage.setItem(key, JSON.stringify(updatedScreenshots));
-          setScreenshots(updatedScreenshots); // Store blob in state
+
+          // Get the existing screenshots from localStorage
+          const storedScreenshots = JSON.parse(localStorage.getItem(key)) || [];
+          storedScreenshots.push(base64); // Add new base64 string
+
+          // Update localStorage
+          localStorage.setItem(key, JSON.stringify(storedScreenshots));
+
+          // Update the state with the new Blob
+          setScreenshots(prevScreenshots => [...prevScreenshots, blob]);
         }
-      }, 'image/jpeg', 0.7); // '0.7' is the image quality (lower for more compression)
-    })
-    .catch((error) => {
-      console.error("Error capturing screenshot:", error);
+      }, 'image/jpeg', 1);
     });
   };
   
+  function handleMarkForReview(){
+    setdata((prevArr) => {
+      const newArr = [...prevArr]; // Create a shallow copy of the array
+      newArr[index] = { ...newArr[index],markForReview:true,submittedAnswer:Selected }; // Update the specific object
+      localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(newArr))
+      return newArr; // Set the updated array
+    });
+    setSelected("")
+    if(index+1==Length){
+      setindex(0)
+      return;
+    }
+    setindex((prev)=>prev+1);
+
+  }
 
   return (
     <>
@@ -766,15 +850,15 @@ useEffect(() => {
               {data[index]?.options && Object.entries(data[index]?.options).map(([key, value]) => (
                 <label
                   key={key}
-                  onClick={() => !data[index]?.isSubmitted ? setSelected(key.toString()) : ""}
+                  onClick={() => !data[index]?.isSubmitted || (data[index]?.markForReview &&  !data[index]?.isSubmitted) ? setSelected(key.toString()) : ""}
                   htmlFor={key.toString()}
-                  className={`${Selected === key.toString() || data[index]?.submittedAnswer === key.toString() ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
+                  className={`${Selected === key.toString() ||(data[index]?.isSubmitted && data[index]?.submittedAnswer === key.toString()) ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
                 >
                   <input
                     name="option"
                     id={key.toString()}
                     type="radio"
-                    checked={data[index]?.isSubmitted ? data[index].submittedAnswer === key.toString() : Selected === key.toString()}
+                    checked={data[index]?.isSubmitted  ? data[index].submittedAnswer === key.toString() : Selected === key.toString()}
                     className="accent-[#1DBF73]"
                     readOnly
                   />
@@ -796,6 +880,16 @@ useEffect(() => {
                   Next
                  
                 </button>
+              
+              </div>
+              <div className="flex justify-end space-x-2">
+              <button
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${!Selected ||  data[index]?.isSubmitted? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                  onClick={()=>!data[index]?.isSubmitted ? handleMarkForReview():""}
+                >
+                  Mark for review
+                 
+                </button>
                 <button
                   className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${data[index]?.isSubmitted || !Selected? "cursor-not-allowed opacity-50" : ""}`}
                   onClick={() => !data[index]?.isSubmitted  && Selected ? handleSubmit() : ""}
@@ -803,6 +897,7 @@ useEffect(() => {
                   {index+1==Length ? 'Save':'Save & Next'}
                  
                 </button>
+              
               </div>
             </div>
           </div>
@@ -814,7 +909,7 @@ useEffect(() => {
                     <div onClick={()=>handleQuestionNumber(ind)} className={ `text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
                       ${
                         index==ind ? 'bg-yellow-400 border border-white':
-
+                        !item?.isSubmitted && item?.markForReview ? 'bg-blue-600':
                         !item?.isSubmitted && !item.isVisited ? 'bg-gray-300':
                        item?.isSubmitted ? 'bg-[#1DBF73]' : 
                        'bg-red-500'

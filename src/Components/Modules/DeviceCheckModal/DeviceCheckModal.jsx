@@ -16,7 +16,10 @@ const DeviceCheckPage = () => {
   });
 
   const [show, setshow] = useState(false);
-  const [isProtected, setisProtected] = useState()
+  const [isProtected, setisProtected] = useState(()=>{
+    let stored=localStorage.getItem('protected'+localStorage.getItem('assessmenttoken'))
+    return stored ? stored : true;
+  })
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [cameraError, setCameraError] = useState('');
@@ -157,14 +160,14 @@ const navigate=useNavigate()
   useEffect(() => {
     async function Fetchdata() {
       try {
-        setshow(true);
-        let url = BASE_URL + "/getUserAssessment?assessmentToken="+localStorage.getItem('assessmenttoken')
-        const data = await fetch(url)
-        const response = await data.json();
-        settime(response?.data?.timelimit)
-        setisProtected(response?.data?.isProtected)
+        // setshow(true);
+        // let url = BASE_URL + "/getUserAssessment?assessmentToken="+localStorage.getItem('assessmenttoken')
+        // const data = await fetch(url)
+        // const response = await data.json();
+        // settime(response?.data?.timelimit)
+        // setisProtected(response?.data?.isProtected)
         // setProctoringdata(response?.data?.ProctoringFor)
-        setshow(false)
+        // setshow(false)
 await startCamera()
 await startMicrophone()
       } catch (error) {
