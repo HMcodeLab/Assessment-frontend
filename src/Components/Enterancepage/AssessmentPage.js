@@ -177,7 +177,7 @@ const [show, setshow] = useState(false)
   
     }
   let navigate=useNavigate()
-  const [futureDate, setFutureDate] = useState(null);
+  const [futureDate, setFutureDate] = useState(new Date());
   
     // Timer state
     const [timer, setTimer] = useState(0);
@@ -324,7 +324,7 @@ function formatDate(dateString) {
                             }}
                         >
                             <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
-                            {formatTime(timer)}
+                            {!show ? formatTime(timer):''}
 
                             </div>
                         </div>
@@ -341,7 +341,7 @@ function formatDate(dateString) {
     }}
 >
     <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
-    {formatDate(data?.lastDate)}
+    { formatDate(data?.lastDate)}
 
     </div>
 </div>
@@ -355,7 +355,7 @@ function formatDate(dateString) {
     }}
 >
     <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
-    {formatDate(data?.lastDate)}
+    {!show ? formatDate(data?.lastDate):''}
 
     </div>
 </div>

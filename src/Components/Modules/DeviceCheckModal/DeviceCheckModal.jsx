@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { TfiControlForward, TfiControlBackward } from "react-icons/tfi";
+import { MdOutlineDone } from "react-icons/md";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { BASE_URL } from "../../../Api";
@@ -212,7 +212,7 @@ await startMicrophone()
                   </svg>
                 </div>
                 <p className="flex-1">Microphone</p>
-               {!micworking ? <button onClick={()=>startMicrophone()}>Verify</button> :  <button >Verified</button>}
+               {!micworking ? <button onClick={()=>startMicrophone()}>Verify</button> :  <div className="flex items-center text-green-600">Verified <MdOutlineDone className="bg-black text-white rounded-full h-5 w-5 ml-2"/></div>}
               </div>
           <div className="flex items-center p-4 border rounded-lg shadow-md">
                 <div className="flex-shrink-0 mr-4">
@@ -232,7 +232,7 @@ await startMicrophone()
                   </svg>
                 </div>
                 <p className="flex-1">Camera</p>
-                {!cameraworking ? <button onClick={startCamera}>Verify</button> : <button >Verified</button>}
+                {!cameraworking ? <button onClick={startCamera}>Verify</button> : <div className="flex items-center text-green-600">Verified <MdOutlineDone className="bg-black text-white rounded-full h-5 w-5 ml-2"/></div>}
 
               </div>
 
@@ -259,7 +259,7 @@ await startMicrophone()
 
           <div className="py-4">{renderStepContent()}</div>
          {(micworking && cameraworking )? <div className="flex justify-center w-full"><button className="bg-green-500 text-white rounded p-2 " onClick={handleContinue}>Continue test</button></div> : ''}
-
+<div className="font-semibold mt-5">Note : If it doesn't verify your camera or microphone automatically then do it manually by clicking on verify button. </div>
         </div>
       </div>
     </div>

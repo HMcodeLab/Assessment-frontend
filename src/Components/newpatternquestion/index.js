@@ -847,6 +847,10 @@ useEffect(() => {
             <div className="bg-slate-300 h-10 w-10"></div>
             <p>Not Attempted</p>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-600 h-10 w-10"></div>
+            <p>Mark For Review</p>
+          </div>
         </div>:''}
         {
           !enablefullscreen ? <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  "><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screen to continue test</button></div>:
