@@ -71,7 +71,7 @@ const [ProctoringScore,setProctoringScore]=useState({
   "TabSwitch":0,
   "multiplePersonInFrame":0,
   "PhoneinFrame":0,
-  "SoundCaptured":0
+  "ControlKeyPressed":0
 })
 const [proctoringActive, setProctoringActive] = useState({
   mic: false,
@@ -485,7 +485,10 @@ useEffect(() => {
     if ((isFunctionKey || isControlKey) && peoplewarning>0 && showalert) {
       event.preventDefault(); // Prevent default behavior
       openModal("You are not allowed to press controll keys")
-
+      setProctoringScore(prevState => ({
+        ...prevState,
+        ControlKeyPressed: prevState.ControlKeyPressed + 1, 
+      }));
       captureScreenshot()
       setpeoplewarning((prev)=>prev-1);
 
