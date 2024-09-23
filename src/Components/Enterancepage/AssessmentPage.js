@@ -313,8 +313,8 @@ function formatDate(dateString) {
                 {/* Left Section */}
                 <div className="w-full lg:w-1/3 bg-[rgba(29,191,115,0.25)] p-8 flex flex-col justify-between">
                    
-                   
                     {
+
                         timer!==0 ?  <div>
                         <h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">Your Test Will Be Live in</h2>
                         <div

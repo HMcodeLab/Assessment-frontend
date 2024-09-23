@@ -203,6 +203,8 @@ function enterFullScreen() {
           ...prevState,
           webcam: prevState.webcam + 1, 
         }));
+        setpeoplewarning((prev)=>prev-1);
+
       }
     }
   };
@@ -474,12 +476,35 @@ useEffect(() => {
     }
   };
 }, [enablefullscreen]);
-  
+useEffect(() => {
+  const handleKeyDown = (event) => {
+    const key = event.key;
+    const isFunctionKey = key.startsWith('F') && key.length === 2; // Function keys (F1-F12)
+    const isControlKey = event.ctrlKey || event.altKey || event.metaKey || event.shiftKey; // Ctrl, Alt, Cmd, Shift
+
+    if ((isFunctionKey || isControlKey) && peoplewarning>0 && showalert) {
+      event.preventDefault(); // Prevent default behavior
+      openModal("You are not allowed to press controll keys")
+
+      captureScreenshot()
+      setpeoplewarning((prev)=>prev-1);
+
+    }
+  };
+
+  // Add the global keydown listener when the component mounts
+  window.addEventListener('keydown', handleKeyDown);
+
+  // Remove the listener when the component unmounts
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, []);
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && proctoringActive.TabSwitch) {
         document.title = "Don't change the tab";
-        if (peoplewarning > 0 && enablefullscreen && showalert) {
+        if (peoplewarning > 0 && enablefullscreen ) {
           captureScreenshot()
           openModal('You are not allowed to change the tab.')
          
@@ -504,7 +529,7 @@ useEffect(() => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [audio,peoplewarning,enablefullscreen]);
+  }, [audio,peoplewarning,enablefullscreen,showalert]);
 
 
 
@@ -619,7 +644,12 @@ useEffect(() => {
           setmicblocked(true)
           captureScreenshot()
           openModal("You can't block the microphone.Give access to microphone manually")
-          
+          setpeoplewarning((prev)=>prev-1);
+
+          setProctoringScore(prevState => ({
+            ...prevState,
+            mic: prevState.mic + 1, 
+          }));
 
         }
       }
@@ -670,6 +700,10 @@ useEffect(() => {
         enterFullScreen()
         setpeoplewarning((prev)=>prev-1);
         openModal("You cant't exist full screen")
+        setProctoringScore(prevState => ({
+          ...prevState,
+          TabSwitch: prevState.TabSwitch + 1, 
+        }));
         captureScreenshot()
 
       }
