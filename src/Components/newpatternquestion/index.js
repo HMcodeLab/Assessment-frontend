@@ -344,56 +344,56 @@ else{
 
   async function handleClick(status,remarks) {
     // console.log(screenshots);
-    setshow(true)
-    let formdata=new FormData()
-    formdata.append('isSuspended',status)
-    formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
-    formdata.append('remarks',remarks)
-    const filteredQuestions = data
-  .filter(question => question.isSubmitted) 
-  .map((question, index) => ({
-    index: index + 1,  
-    answer: question.submittedAnswer  
-  }));
-  formdata.append('answers',JSON.stringify(filteredQuestions))
-  console.log(filteredQuestions);
+  //   setshow(true)
+  //   let formdata=new FormData()
+  //   formdata.append('isSuspended',status)
+  //   formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
+  //   formdata.append('remarks',remarks)
+  //   const filteredQuestions = data
+  // .filter(question => question.isSubmitted) 
+  // .map((question, index) => ({
+  //   index: index + 1,  
+  //   answer: question.submittedAnswer  
+  // }));
+  // formdata.append('answers',JSON.stringify(filteredQuestions))
+  // console.log(filteredQuestions);
   
-    // const filesArray = [];
-    screenshots.forEach((blob, index) => {
-      const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
-      formdata.append('userScreenshots', file);
-    });
-    try {
-      let url = `${BASE_URL}/finishAssessment`;
-      const data = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: formdata,
-      });
-      const response = await data.json();
-      if (response.success) {
-        setshow(false)
-        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-    localStorage.clear();
+  //   // const filesArray = [];
+  //   screenshots.forEach((blob, index) => {
+  //     const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
+  //     formdata.append('userScreenshots', file);
+  //   });
+  //   try {
+  //     let url = `${BASE_URL}/finishAssessment`;
+  //     const data = await fetch(url, {
+  //       method: "PUT",
+  //       headers: {
+  //         Accept: "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: formdata,
+  //     });
+  //     const response = await data.json();
+  //     if (response.success) {
+  //       setshow(false)
+  //       localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+  //   localStorage.clear();
 
-        if(status){
-          toast.error("Suspended!");
-          window.location.replace('/suspended');
-        }
-        else{
-          toast.success("Submitted Successfully");
-          window.location.replace('/submitted');
-        }
+  //       if(status){
+  //         toast.error("Suspended!");
+  //         window.location.replace('/suspended');
+  //       }
+  //       else{
+  //         toast.success("Submitted Successfully");
+  //         window.location.replace('/submitted');
+  //       }
      
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  //     } else {
+  //       toast.error(response.message);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
   }
 
   function handlePrev() {
@@ -786,9 +786,9 @@ useEffect(() => {
 
   return (
     <>
-    <div ref={screenshotRef} onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen xsm:h-full">
+    <div ref={screenshotRef} onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen xsm:h-full mx-auto ">
       {enablefullscreen?<Watermark />:''}
-      <div className="absolute top-0 bg-white" >
+      <div className="absolute  top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-white w-full overflow-hidden" >
     <Modal
         isOpen={modalIsOpen}
         onAfterOpen={afterOpenModal}

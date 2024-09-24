@@ -373,7 +373,7 @@ function formatDate(dateString) {
                         </div>
                         <div className="flex items-center">
                             <MdPhone className="text-[rgba(60,60,60,1)] mr-2" size={20} /> {/* Phone icon */}
-                            <p className="font-poppins text-[rgba(60,60,60,1)]">+91 7447723467, 3562563553</p>
+                            <p className="font-poppins text-[rgba(60,60,60,1)]">90560-22600, 9139100050</p>
                         </div>
 
                     </div>
