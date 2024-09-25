@@ -343,57 +343,57 @@ else{
   }
 
   async function handleClick(status,remarks) {
-    console.log(screenshots);
-    setshow(true)
-    let formdata=new FormData()
-    formdata.append('isSuspended',status)
-    formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
-    formdata.append('remarks',remarks)
-    const filteredQuestions = data
-  .filter(question => question.isSubmitted) 
-  .map((question, index) => ({
-    index: index + 1,  
-    answer: question.submittedAnswer  
-  }));
-  formdata.append('answers',JSON.stringify(filteredQuestions))
-  console.log(filteredQuestions);
+  //   console.log(screenshots);
+  //   setshow(true)
+  //   let formdata=new FormData()
+  //   formdata.append('isSuspended',status)
+  //   formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
+  //   formdata.append('remarks',remarks)
+  //   const filteredQuestions = data
+  // .filter(question => question.isSubmitted) 
+  // .map((question, index) => ({
+  //   index: index + 1,  
+  //   answer: question.submittedAnswer  
+  // }));
+  // formdata.append('answers',JSON.stringify(filteredQuestions))
+  // console.log(filteredQuestions);
   
-    // const filesArray = [];
-    screenshots.forEach((blob, index) => {
-      const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
-      formdata.append('userScreenshots', file);
-    });
-    try {
-      let url = `${BASE_URL}/finishAssessment`;
-      const data = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: formdata,
-      });
-      const response = await data.json();
-      if (response.success) {
-        setshow(false)
-        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-    localStorage.clear();
+  //   // const filesArray = [];
+  //   screenshots.forEach((blob, index) => {
+  //     const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
+  //     formdata.append('userScreenshots', file);
+  //   });
+  //   try {
+  //     let url = `${BASE_URL}/finishAssessment`;
+  //     const data = await fetch(url, {
+  //       method: "PUT",
+  //       headers: {
+  //         Accept: "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: formdata,
+  //     });
+  //     const response = await data.json();
+  //     if (response.success) {
+  //       setshow(false)
+  //       localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+  //   localStorage.clear();
 
-        if(status){
-          toast.error("Suspended!");
-          window.location.replace('/suspended');
-        }
-        else{
-          toast.success("Submitted Successfully");
-          window.location.replace('/submitted');
-        }
+  //       if(status){
+  //         toast.error("Suspended!");
+  //         window.location.replace('/suspended');
+  //       }
+  //       else{
+  //         toast.success("Submitted Successfully");
+  //         window.location.replace('/submitted');
+  //       }
      
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  //     } else {
+  //       toast.error(response.message);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
   }
 
   function handlePrev() {
@@ -881,11 +881,11 @@ useEffect(() => {
         <div  className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop xsm:h-auto">
       {   
       index+1<=Length?<>
-      <div className="w-[45%] rounded-xl border h-full shadow-xl xsm:w-full">
+      <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:h-full">
             <div className="border-b-[2px] p-3 font-semibold">{data[index]?.module}</div>
             <div className="p-3 text-lg text-gray-700">Q:{index+1}{") "} {data[index]?.question}</div>
           </div>
-          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit">
+          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit scrollbarnumber">
             <div className="border-b-[2px] p-3 font-semibold">Options</div>
             <div className="flex flex-col p-5 gap-y-5 ">
               {data[index]?.options && Object.entries(data[index]?.options).map(([key, value]) => (
