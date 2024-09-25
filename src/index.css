@@ -17,7 +17,7 @@ code {
     monospace;
 }
 .scrollbarnumber::-webkit-scrollbar{
-  width: 2px;
+  width: '2px';
 }
 .scrollbarnumber2::-webkit-scrollbar{
   width: 0px;
