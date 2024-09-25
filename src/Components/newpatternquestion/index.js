@@ -635,7 +635,7 @@ useEffect(() => {
             // Restart audio monitoring after 2 seconds
             setTimeout(() => {
               handleAudioMonitoring();
-            }, 2000);
+            }, 5000);
           }
         };
   
@@ -664,7 +664,7 @@ useEffect(() => {
     handleAudioMonitoring();
    }
     return () => clearInterval(audioIntervalRef.current);
-  }, [enablefullscreen,proctoringActive]);
+  }, [enablefullscreen,proctoringActive,showalert]);
 
   useEffect(() => {
     if (phoneDetected && proctoringActive.PhoneinFrame && showalert && peoplewarning>0) {
