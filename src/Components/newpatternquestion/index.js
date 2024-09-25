@@ -764,7 +764,7 @@ useEffect(() => {
           // Update the state with the new Blob
           setScreenshots(prevScreenshots => [...prevScreenshots, blob]);
         }
-      }, 'image/jpeg', 1);
+      }, 'image/jpeg', 0.7);
     });
   };
   
