@@ -96,7 +96,7 @@ body:JSON.stringify(formData)
         </div>
 
         {/* Right: Feedback Form */}
-        <div className="bg-white rounded-lg shadow-xl p-8 w-[40%] mt-5 md:mt-0 xsm:w-full max-h-[90vh] overflow-y-auto scrollbarnumber">
+        <div className="bg-white rounded-lg shadow-xl p-8 w-[40%] mt-5 md:mt-0 xsm:w-full max-h-[90vh] overflow-y-auto scrollbarnumber2">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
             We'd Love Your Feedback
           </h2>

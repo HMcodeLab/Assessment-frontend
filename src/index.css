@@ -17,7 +17,10 @@ code {
     monospace;
 }
 .scrollbarnumber::-webkit-scrollbar{
-  width: '2px';
+  width: 2px;
+}
+.scrollbarnumber2::-webkit-scrollbar{
+  width: 0px;
 }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
