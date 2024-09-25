@@ -730,7 +730,7 @@ useEffect(() => {
 
   // Function to capture the screenshot and store it in the state
   const captureScreenshot = () => {
-    const element = screenshotRef.current;
+    const element = contentRef.current;
 
     html2canvas(element, {
       useCORS: true,
