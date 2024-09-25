@@ -9,6 +9,7 @@ body {
     'sans-serif';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  user-select: none;
 }
 
 code {
@@ -16,7 +17,7 @@ code {
     monospace;
 }
 .scrollbarnumber::-webkit-scrollbar{
-  width: 0px;
+  width: '2px';
 }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {

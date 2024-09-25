@@ -275,7 +275,7 @@ function enterFullScreen() {
         });
         localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
         setshow(false);
-        if(data[index+1]?.markForReview){
+        if(data[index+1]?.markForReview || data[index+1]?.isSubmitted){
           setSelected(data[index+1]?.submittedAnswer)
         }
         else{
@@ -309,7 +309,7 @@ function enterFullScreen() {
         return newArr; // Set the updated array
       });
       localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
-if(data[index]?.markForReview){
+if(data[index]?.markForReview || data[index]?.isSubmitted){
   setSelected(data[index]?.submittedAnswer)
 }
 else{
@@ -331,7 +331,7 @@ else{
       });
       localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index-1)
 
-      if(data[index-1]?.markForReview){
+      if(data[index-1]?.markForReview || data[index-1]?.isSubmitted){
         setSelected(data[index-1]?.submittedAnswer)
       }
       else{
@@ -343,7 +343,7 @@ else{
   }
 
   async function handleClick(status,remarks) {
-    console.log(screenshots);
+  //   console.log(screenshots);
     setshow(true)
     let formdata=new FormData()
     formdata.append('isSuspended',status)
@@ -356,7 +356,7 @@ else{
     answer: question.submittedAnswer  
   }));
   formdata.append('answers',JSON.stringify(filteredQuestions))
-  console.log(filteredQuestions);
+  // console.log(filteredQuestions);
   
     // const filesArray = [];
     screenshots.forEach((blob, index) => {
@@ -396,19 +396,9 @@ else{
     }
   }
 
-  function handlePrev() {
-    if (localStorage.getItem('history')) {
-      let history = localStorage.getItem('history');
-      localStorage.removeItem('history');
-      window.location.replace(history)
-    } else {
-      window.location.replace('/modules')
-    }
-  }
 
   const [audio] = useState(new Audio('/danger.mp3'));
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [escapePressed, setEscapePressed] = useState(false);
+
   const [personCount, setPersonCount] = useState(-1);
   const [cameraActive, setcameraActive] = useState(false)
   const contentRef = useRef(null);
@@ -729,7 +719,7 @@ useEffect(() => {
     localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),ind)
 
     setindex(ind)
-    if(data[ind]?.markForReview){
+    if(data[ind]?.markForReview || data[ind]?.isSubmitted){
       setSelected(data[ind]?.submittedAnswer)
     }
     else{
@@ -740,7 +730,7 @@ useEffect(() => {
 
   // Function to capture the screenshot and store it in the state
   const captureScreenshot = () => {
-    const element = contentRef.current;
+    const element = screenshotRef.current;
 
     html2canvas(element, {
       useCORS: true,
@@ -786,9 +776,9 @@ useEffect(() => {
 
   return (
     <>
-    <div ref={screenshotRef} onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen xsm:h-full mx-auto ">
+    <div  onContextMenu={(e)=>e.preventDefault()} className="relative w-full h-screen xsm:h-full mx-auto ">
       {enablefullscreen?<Watermark />:''}
-      <div className="absolute  top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-white w-full overflow-hidden" >
+      <div ref={screenshotRef} className="absolute  top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-white w-full overflow-hidden" >
     <Modal
         isOpen={modalIsOpen}
         onAfterOpen={afterOpenModal}
@@ -891,15 +881,15 @@ useEffect(() => {
               {data[index]?.options && Object.entries(data[index]?.options).map(([key, value]) => (
                 <label
                   key={key}
-                  onClick={() => !data[index]?.isSubmitted || (data[index]?.markForReview &&  !data[index]?.isSubmitted) ? setSelected(key.toString()) : ""}
+                  onClick={() => setSelected(key.toString())}
                   htmlFor={key.toString()}
-                  className={`${Selected === key.toString() ||(data[index]?.isSubmitted && data[index]?.submittedAnswer === key.toString()) ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
+                  className={`${Selected === key.toString()  ? "border-[#1DBF73]" : ""} flex p-3 border rounded-lg space-x-2 cursor-pointer`}
                 >
                   <input
                     name="option"
                     id={key.toString()}
                     type="radio"
-                    checked={data[index]?.isSubmitted  ? data[index].submittedAnswer === key.toString() : Selected === key.toString()}
+                    checked={Selected === key.toString()}
                     className="accent-[#1DBF73]"
                     readOnly
                   />
@@ -925,15 +915,15 @@ useEffect(() => {
               </div>
               <div className="flex justify-end space-x-2">
               <button
-                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${!Selected ||  data[index]?.isSubmitted? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                  onClick={()=>!data[index]?.isSubmitted ? handleMarkForReview():""}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white `}
+                  onClick={()=>handleMarkForReview()}
                 >
                   Mark for review
                  
                 </button>
                 <button
-                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${data[index]?.isSubmitted || !Selected? "cursor-not-allowed opacity-50" : ""}`}
-                  onClick={() => !data[index]?.isSubmitted  && Selected ? handleSubmit() : ""}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white `}
+                  onClick={() => Selected ? handleSubmit() : ""}
                 >
                   {index+1==Length ? 'Save':'Save & Next'}
                  
