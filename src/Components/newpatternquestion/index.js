@@ -343,57 +343,57 @@ else{
   }
 
   async function handleClick(status,remarks) {
-  //   console.log(screenshots);
-  //   setshow(true)
-  //   let formdata=new FormData()
-  //   formdata.append('isSuspended',status)
-  //   formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
-  //   formdata.append('remarks',remarks)
-  //   const filteredQuestions = data
-  // .filter(question => question.isSubmitted) 
-  // .map((question, index) => ({
-  //   index: index + 1,  
-  //   answer: question.submittedAnswer  
-  // }));
-  // formdata.append('answers',JSON.stringify(filteredQuestions))
-  // console.log(filteredQuestions);
+    console.log(screenshots);
+    setshow(true)
+    let formdata=new FormData()
+    formdata.append('isSuspended',status)
+    formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
+    formdata.append('remarks',remarks)
+    const filteredQuestions = data
+  .filter(question => question.isSubmitted) 
+  .map((question, index) => ({
+    index: index + 1,  
+    answer: question.submittedAnswer  
+  }));
+  formdata.append('answers',JSON.stringify(filteredQuestions))
+  console.log(filteredQuestions);
   
-  //   // const filesArray = [];
-  //   screenshots.forEach((blob, index) => {
-  //     const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
-  //     formdata.append('userScreenshots', file);
-  //   });
-  //   try {
-  //     let url = `${BASE_URL}/finishAssessment`;
-  //     const data = await fetch(url, {
-  //       method: "PUT",
-  //       headers: {
-  //         Accept: "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: formdata,
-  //     });
-  //     const response = await data.json();
-  //     if (response.success) {
-  //       setshow(false)
-  //       localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-  //   localStorage.clear();
+    // const filesArray = [];
+    screenshots.forEach((blob, index) => {
+      const file = new File([blob], `screenshot_${index}.jpeg`, { type: 'image/jpeg' });
+      formdata.append('userScreenshots', file);
+    });
+    try {
+      let url = `${BASE_URL}/finishAssessment`;
+      const data = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formdata,
+      });
+      const response = await data.json();
+      if (response.success) {
+        setshow(false)
+        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+    localStorage.clear();
 
-  //       if(status){
-  //         toast.error("Suspended!");
-  //         window.location.replace('/suspended');
-  //       }
-  //       else{
-  //         toast.success("Submitted Successfully");
-  //         window.location.replace('/submitted');
-  //       }
+        if(status){
+          toast.error("Suspended!");
+          window.location.replace('/suspended');
+        }
+        else{
+          toast.success("Submitted Successfully");
+          window.location.replace('/submitted');
+        }
      
-  //     } else {
-  //       toast.error(response.message);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   function handlePrev() {
