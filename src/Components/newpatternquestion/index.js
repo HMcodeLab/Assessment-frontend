@@ -838,7 +838,7 @@ useEffect(() => {
           </div>
           <div className="flex items-center gap-2">
             <div className="bg-slate-300 h-10 w-10"></div>
-            <p>Not Attempted</p>
+            <p>Unattempted</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="bg-blue-600 h-10 w-10"></div>
