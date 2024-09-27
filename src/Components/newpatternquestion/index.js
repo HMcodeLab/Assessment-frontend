@@ -620,7 +620,10 @@ useEffect(() => {
           if (volume > 200 && temp && showalert && peoplewarning>0) {
             captureScreenshot()
             openModal('You are not allowed to speak during the test.')
-            
+            setProctoringScore(prevState => ({
+              ...prevState,
+              mic: prevState.mic + 1, 
+            }));
 
             temp=false;
             // console.log(peoplewarning-1);
