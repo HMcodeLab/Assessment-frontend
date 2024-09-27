@@ -477,7 +477,7 @@ useEffect(() => {
     const isFunctionKey = key.startsWith('F') && key.length === 2; // Function keys (F1-F12)
     const isControlKey = event.ctrlKey || event.altKey || event.metaKey || event.shiftKey; // Ctrl, Alt, Cmd, Shift
 
-    if ((isFunctionKey || isControlKey) && peoplewarning>0 && showalert) {
+    if ((isFunctionKey || isControlKey) && peoplewarning>0 && showalert && proctoringActive.ControlKeyPressed) {
       event.preventDefault(); // Prevent default behavior
       openModal("You are not allowed to press controll keys")
       setProctoringScore(prevState => ({
