@@ -28,6 +28,7 @@ export default function NewQuestion() {
   const [show, setshow] = useState(false);
   const [params, setparams] = useSearchParams();
   const screenshotRef = useRef();
+  const [personDetectionDisabled, setPersonDetectionDisabled] = useState(false);
   const [screenshots, setScreenshots] = useState(() => {
     const key = `screenshots${localStorage.getItem('assessmenttoken')}`;
     const storedScreenshots = localStorage.getItem(key);
@@ -71,7 +72,8 @@ const [ProctoringScore,setProctoringScore]=useState({
   "TabSwitch":0,
   "multiplePersonInFrame":0,
   "PhoneinFrame":0,
-  "ControlKeyPressed":0
+  "ControlKeyPressed":0,
+  "invisiblecam":0
 })
 const [proctoringActive, setProctoringActive] = useState({
   mic: false,
@@ -79,7 +81,8 @@ const [proctoringActive, setProctoringActive] = useState({
   TabSwitch: false,
   multiplePersonInFrame: false,
   PhoneinFrame: false,
-  SoundCaptured: false
+  ControlKeyPressed: false,
+  invisiblecam:false
 });
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
@@ -174,8 +177,7 @@ function enterFullScreen() {
   //     localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(data))
   //   }
   // }, [index])
-  
-  const loadModelAndDetect = async () => {
+   const loadModelAndDetect = async () => {
     const model = await cocoSsd.load();
     setcameraActive(true)
     setInterval(() => detectFrame(videoRef.current, model), 100);
@@ -201,7 +203,7 @@ function enterFullScreen() {
 
         setProctoringScore(prevState => ({
           ...prevState,
-          webcam: prevState.webcam + 1, 
+          invisiblecam: prevState.invisiblecam + 1, 
         }));
         setpeoplewarning((prev)=>prev-1);
 
@@ -212,9 +214,11 @@ function enterFullScreen() {
   const detectFrame = async (video, model) => {
     if (video && video.readyState === 4) {
       const predictions = await model.detect(video);
-      drawBoundingBoxes(predictions);
-      checkForPhone(predictions);
-      countPersons(predictions);
+      if (!personDetectionDisabled) {
+        drawBoundingBoxes(predictions);
+        checkForPhone(predictions);
+        countPersons(predictions);
+      }
     }
   };
 
@@ -222,6 +226,8 @@ function enterFullScreen() {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     predictions.forEach(prediction => {
+      // console.log(prediction.class);
+      
       if (prediction.class === 'person') {
         const [x, y, width, height] = prediction.bbox;
         // ctx.strokeStyle = 'red';
@@ -245,7 +251,6 @@ function enterFullScreen() {
     const phoneDetected = predictions.some(prediction => prediction.class === 'cell phone');
     setPhoneDetected(phoneDetected);
   };
-
 
   const handleSubmit = async () => {
     // try {
@@ -343,7 +348,7 @@ else{
   }
 
   async function handleClick(status,remarks) {
-  //   console.log(screenshots);
+    // console.log(screenshots);
     setshow(true)
     let formdata=new FormData()
     formdata.append('isSuspended',status)
@@ -542,41 +547,48 @@ useEffect(() => {
   }, [enablefullscreen,proctoringActive.webcam]);
 
   useEffect(() => {
-   if(proctoringActive.multiplePersonInFrame){
-    if (personCount > 1) {
-      if(peoplewarning>=0 && cameraActive && showalert){
-        captureScreenshot()
-        openModal(`Warning!! ${personCount} Person Detected in your camera frame.`)
+    if (proctoringActive.multiplePersonInFrame && !personDetectionDisabled) {
+      if (personCount > 1) {
+        if (peoplewarning >= 0 && cameraActive && showalert) {
+          captureScreenshot();
+          openModal(`Warning!! ${personCount} Person Detected in your camera frame.`);
+          
+          setProctoringScore(prevState => ({
+            ...prevState,
+            multiplePersonInFrame: prevState.multiplePersonInFrame + 1,
+          }));
+          setpeoplewarning((prev) => prev - 1);
+          setPersonCount(-1);
+  
+          // Disable person detection for 6 seconds after an alert is shown
+          setPersonDetectionDisabled(true);
+          setTimeout(() => {
+            setPersonDetectionDisabled(false); // Enable detection again after 6 seconds
+          }, 6000);
+        }
+      }
+    }
+  
+    if (personCount === 0 && cameraActive && proctoringActive.webcam && proctoringActive.invisiblecam && !personDetectionDisabled) {
+      if (peoplewarning >= 0 && showalert) {
+        captureScreenshot();
+        openModal(`Warning!! Your face should be clearly visible in front of the camera.`);
         
-
+        setpeoplewarning((prev) => prev - 1);
+        setPersonCount(-1);
         setProctoringScore(prevState => ({
           ...prevState,
-          multiplePersonInFrame: prevState.multiplePersonInFrame + 1, 
+          invisiblecam: prevState.invisiblecam + 1,
         }));
-        setpeoplewarning((prev)=>prev-1);
-      }  
-     
-    } 
-   }
-   if (personCount === 0 && cameraActive && proctoringActive.webcam ) {
-    // openModal("i m in")
-    if(peoplewarning>=0  && showalert){
-      captureScreenshot()
-      openModal(`Warning!! Your face should be clearly visible infront of camera.`)
-      
-
-      setpeoplewarning((prev)=>prev-1);
-      setPersonCount(-1)
-      setProctoringScore(prevState => ({
-        ...prevState,
-        webcam: prevState.webcam + 1, 
-      }));
-    }      
-  }
-    
-
-    // enterFullScreen();
-  }, [personCount,enablefullscreen,showalert,cameraActive]);
+  
+        // Disable person detection for 6 seconds after an alert is shown
+        setPersonDetectionDisabled(true);
+        setTimeout(() => {
+          setPersonDetectionDisabled(false); // Enable detection again after 6 seconds
+        }, 6000);
+      }
+    }
+  }, [personCount, enablefullscreen, showalert, cameraActive]);
 
   useEffect(() => {
     localStorage.setItem('warnings'+localStorage.getItem('assessmenttoken'),peoplewarning)
@@ -915,14 +927,14 @@ useEffect(() => {
               </div>
               <div className="flex justify-end space-x-2">
               <button
-                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white `}
-                  onClick={()=>handleMarkForReview()}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-[rgb(29,191,115)] text-white ${!Selected ? 'cursor-not-allowed opacity-50':''}`}
+                  onClick={()=>Selected ? handleMarkForReview():''}
                 >
                   Mark for review
                  
                 </button>
                 <button
-                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white `}
+                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${!Selected ? 'cursor-not-allowed opacity-50':''}`}
                   onClick={() => Selected ? handleSubmit() : ""}
                 >
                   {index+1==Length ? 'Save':'Save & Next'}
