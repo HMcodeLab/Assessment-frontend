@@ -9,6 +9,7 @@ import { ImCross } from "react-icons/im";
 import { BASE_URL } from "../../Api";
 import Spinner from "../Spinner";
 import Watermark from "../temp";
+import { SlRefresh } from "react-icons/sl";
 import html2canvas from 'html2canvas';
 const base64ToBlob = (base64, contentType = 'image/jpeg') => {
   const byteCharacters = atob(base64.split(',')[1]);
@@ -23,6 +24,7 @@ const base64ToBlob = (base64, contentType = 'image/jpeg') => {
 };
 export default function NewQuestion() {
   const [enablefullscreen, setenablefullscreen] = useState(false)
+  const [showtimer, setshowtimer] = useState(true)
   const [Selected, setSelected] = useState();
   const [data, setdata] = useState([]);
   const [show, setshow] = useState(false);
@@ -146,7 +148,7 @@ function enterFullScreen() {
     setProctoringActive(newProctoringActive);
     let checkdata=localStorage.getItem('data'+localStorage.getItem('assessmenttoken')) 
     if(checkdata){
-      console.log(checkdata,JSON.parse(checkdata));
+      // console.log(checkdata,JSON.parse(checkdata));
       
       setdata(JSON.parse(checkdata))
     }
@@ -156,8 +158,9 @@ function enterFullScreen() {
         
         setLength(response?.totalQuestions);
       } else {
-        toast.success(response?.message)
-        localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'))
+        setshowtimer(false)
+        toast.error(response?.message)
+        // localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'))
         // navigate("/submitted");
       }
     } catch (error) {
@@ -278,7 +281,6 @@ function enterFullScreen() {
 
           return newArr; // Set the updated array
         });
-        localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
         setshow(false);
         if(data[index+1]?.markForReview || data[index+1]?.isSubmitted){
           setSelected(data[index+1]?.submittedAnswer)
@@ -291,11 +293,13 @@ function enterFullScreen() {
         if(index+1==Length){
           // handleClick(false,"")
           setindex(0)
+          localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index)
 
           return;
         }
 
-      
+        localStorage.setItem('lastindex'+localStorage.getItem('assessmenttoken'),index+1)
+
         setindex((prev)=>prev+1);
        
         // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
@@ -354,6 +358,7 @@ else{
     formdata.append('isSuspended',status)
     formdata.append('ProctoringScore',JSON.stringify(ProctoringScore))
     formdata.append('remarks',remarks)
+    formdata.append('lastindex',index)
     const filteredQuestions = data
   .filter(question => question.isSubmitted) 
   .map((question, index) => ({
@@ -381,8 +386,8 @@ else{
       const response = await data.json();
       if (response.success) {
         setshow(false)
-        localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-    localStorage.clear();
+        // localStorage.removeItem(localStorage.getItem('assessmenttoken'))
+    // localStorage.clear();
 
         if(status){
           toast.error("Suspended!");
@@ -428,7 +433,7 @@ const formatTime = (totalSeconds) => {
 
 const startTimer = () => {
   // Check if there's already an interval running to prevent multiple intervals
-  if (timerIntervalRef.current || !enablefullscreen) {
+  if (timerIntervalRef.current || !enablefullscreen || !showtimer) {
     return;
   }
 
@@ -442,7 +447,7 @@ const startTimer = () => {
         
 
         localStorage.removeItem('time'+localStorage.getItem('assessmenttoken'));
-        handleClick(true, "Time's up");
+        handleClick(false, "Time's up");
         return 0;
       }
       localStorage.setItem('time'+localStorage.getItem('assessmenttoken'), prevTimer - 1);
@@ -470,12 +475,13 @@ useEffect(() => {
       timerIntervalRef.current = null;
     }
   };
-}, [enablefullscreen]);
+}, [enablefullscreen,showtimer]);
 useEffect(() => {
   const handleKeyDown = (event) => {
     const key = event.key;
     const isFunctionKey = key.startsWith('F') && key.length === 2; // Function keys (F1-F12)
     const isControlKey = event.ctrlKey || event.altKey || event.metaKey || event.shiftKey; // Ctrl, Alt, Cmd, Shift
+console.log(proctoringActive);
 
     if ((isFunctionKey || isControlKey) && peoplewarning>0 && showalert && proctoringActive.ControlKeyPressed) {
       event.preventDefault(); // Prevent default behavior
@@ -497,7 +503,7 @@ useEffect(() => {
   return () => {
     window.removeEventListener('keydown', handleKeyDown);
   };
-}, []);
+}, [proctoringActive.ControlKeyPressed]);
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && proctoringActive.TabSwitch) {
@@ -788,6 +794,11 @@ useEffect(() => {
     setindex((prev)=>prev+1);
 
   }
+  function handleReload(){
+    // setenablefullscreen(true)
+    enterFullScreen()
+    Fetchdata()
+  }
 
   return (
     <>
@@ -820,9 +831,7 @@ useEffect(() => {
     </div>
       </Modal>
     <div>
-    <Toaster toastOptions={{
-         duration: 500,
-      }} />
+    <Toaster />
     {
       camerablocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the camera. </div>
 : micblocked ? <div className="flex justify-center w-full h-screen items-center font-semibold font-pop">If you want to continue the test then first turn on the microphone. </div> :
@@ -838,36 +847,48 @@ useEffect(() => {
       
      
    
-      { enablefullscreen ? <div className="fixed bottom-2 left-[250px] flex items-center gap-5 xsm:hidden">
+      { enablefullscreen ? 
+      <>
+         <div className="fixed -top-5 left-3 flex items-center justify-center gap-1 cursor-pointer w-fit" onClick={()=>handleReload()}>
+         <SlRefresh />
+         <p className="text-sm italic">Reload page if needed</p>
+         </div>
+      <div className="fixed bottom-2 left-[250px] flex items-center gap-5 xsm:hidden">
           <div className="flex items-center gap-2">
-            <div className="bg-red-500 h-10 w-10"></div>
+            <div className="bg-red-500 h-4 w-4"></div>
             <p>Skipped</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="bg-[#1DBF73] h-10 w-10"></div>
+            <div className="bg-[#1DBF73] h-4 w-4"></div>
             <p>Attempted</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="bg-yellow-400 h-10 w-10"></div>
+            <div className="bg-yellow-400 h-4 w-4"></div>
             <p>Active Question</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="bg-slate-300 h-10 w-10"></div>
+            <div className="bg-slate-300 h-4 w-4"></div>
             <p>Unattempted</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 h-10 w-10"></div>
+            <div className="bg-blue-600 h-4 w-4"></div>
             <p>Mark For Review</p>
           </div>
-        </div>:''}
+        </div>
+        </>
+        :''}
         {
           !enablefullscreen ? <div className="flex justify-center items-center w-full h-full"><button className="bg-[#1DBF73] text-white rounded p-2" onClick={enterFullScreen}>Enable full screen to continue test</button></div>:
         <>
+      
+          
         <div className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-5" onContextMenu={(e)=>e.preventDefault()}>
-          <div className=" bg-white p-2 rounded-lg shadow-md font-bold text-xl">
-          Time Remaining: {formatTime(timer)}
+        
+        <div className="font-bold text-xl flex justify-center gap-3 items-center w-fit ">
+          <p className="bg-white p-2 rounded-lg shadow-md">Time Remaining: {formatTime(timer)}</p>
+        
           </div>
-          <div className="font-semibold text-lg">
+          <div className="font-semibold text-lg text-left">
           {assessmentname}
           </div>
           <div className="flex items-center space-x-3">

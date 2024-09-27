@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 import { BASE_URL } from '../../Api';
 import toast, { Toaster } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Submittedassessment = () => {
+  const navigate=useNavigate()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,7 +72,11 @@ body:JSON.stringify(formData)
       }
     }
   };
-
+  function handleResume(){
+    localStorage.setItem('warnings'+localStorage.getItem('assessmenttoken'),3)
+    localStorage.removeItem('screenshots'+localStorage.getItem('assessmenttoken'))
+    navigate('/question')
+  }
   return (
     <div className="h-screen bg-gray-50 py-10 px-4 w-full">
       <Toaster/>
@@ -80,6 +86,7 @@ body:JSON.stringify(formData)
         <div className='md:w-1/2 flex justify-center items-center flex-col '>
           <img width="188" height="188" src="/ok.gif" alt="submitted" />
           <h1 className='text-[#1DBF73] font-semibold text-2xl mt-4'>Assessment Submitted</h1>
+          <button className='bg-[#1DBF73] text-white rounded p-3 mt-5' onClick={handleResume}>Resume Test</button>
           <div className="mt-12 rounded-lg p-8 max-w-6xl mx-auto">
             <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">Contact Us</h3>
             <div className="space-y-4 text-center">
