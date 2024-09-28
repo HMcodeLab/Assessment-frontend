@@ -394,9 +394,13 @@ else{
 
         if(status){
           toast.error("Suspended!");
+          localStorage.setItem('warnings'+localStorage.getItem('assessmenttoken'),3)
+          localStorage.removeItem('screenshots'+localStorage.getItem('assessmenttoken'))
           window.location.replace('/suspended');
         }
         else{
+          localStorage.setItem('warnings'+localStorage.getItem('assessmenttoken'),3)
+          localStorage.removeItem('screenshots'+localStorage.getItem('assessmenttoken'))
           toast.success("Submitted Successfully");
           window.location.replace('/submitted');
         }

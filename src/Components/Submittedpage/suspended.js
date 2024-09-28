@@ -89,8 +89,7 @@ body:JSON.stringify(formData)
     }
   };
 function handleResume(){
-  localStorage.setItem('warnings'+localStorage.getItem('assessmenttoken'),3)
-  localStorage.removeItem('screenshots'+localStorage.getItem('assessmenttoken'))
+ 
   navigate('/question')
 }
   return (
