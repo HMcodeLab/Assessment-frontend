@@ -277,6 +277,9 @@ function enterFullScreen() {
         setdata((prevArr) => {
           const newArr = [...prevArr]; // Create a shallow copy of the array
           newArr[index] = { ...newArr[index], submittedAnswer: Selected,isSubmitted:true }; // Update the specific object
+         if(index+1<Length){
+          newArr[index+1] = { ...newArr[index+1], isVisited:true }; // Update the specific object
+         }
           localStorage.setItem('data'+localStorage.getItem('assessmenttoken'),JSON.stringify(newArr))
 
           return newArr; // Set the updated array

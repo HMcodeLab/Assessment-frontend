@@ -94,7 +94,7 @@ function handleResume(){
   navigate('/question')
 }
   return (
-    <div className="h-screen bg-gray-50 py-10 px-4 w-full">
+    <div className="h-screen bg-gray-50 py-10 px-4 w-full overflow-y-hidden">
       <Toaster/>
       <div className="flex items-center justify-center gap-5 mx-auto xsm:flex-col">
         {/* Left: Image and Text */}
