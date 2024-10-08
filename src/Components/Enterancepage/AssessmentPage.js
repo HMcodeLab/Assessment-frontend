@@ -194,7 +194,7 @@ const [show, setshow] = useState(false)
         localStorage.setItem('time'+assessmentToken,parseInt(response?.data?.timelimit)*60)
         localStorage.setItem('protected'+assessmentToken,response?.data?.isProtected)
   setdata(response?.data)
-  setFutureDate(new Date(response?.data?.startDate))
+  setFutureDate(response?.data?.startDate)
   setshow(false)
       }
     } catch (error) {
@@ -206,12 +206,28 @@ const [show, setshow] = useState(false)
     temp=false;
   }
   }, [])
-  
-  const calculateDuration = (futureDate) => {
+  const calculateDuration = (future) => {
+    // Convert future to a Date object; it will automatically parse ISO 8601 strings correctly
+    let futureDateObj = new Date(future);
+    
+    // Subtract 5.5 hours from the future date
+    const hoursToSubtract = 5.5; // 5.5 hours
+    futureDateObj.setTime(futureDateObj.getTime() - hoursToSubtract * 60 * 60 * 1000);
+    console.log('Adjusted Future Date (UTC):', futureDateObj.toISOString());
+
+    // Get the current date and time in UTC
     const now = new Date();
-    const duration = Math.max(Math.floor((futureDate - now) / 1000), 0); // Ensure duration is not negative
+    console.log('Current Date (UTC):', now.toISOString());
+
+    // Calculate the duration in seconds
+    const duration = Math.max(Math.floor((futureDateObj.getTime() - now.getTime()) / 1000), 0); // Ensure duration is not negative
     setTimer(duration);
-  };
+};
+
+  
+  // Example usage
+  
+  
   
   // Start timer based on the current timer state
   const startTimer = () => {
@@ -257,25 +273,29 @@ const [show, setshow] = useState(false)
   };
 
 
-function formatDate(dateString) {
+  function formatDate(dateString) {
     const dateObj = new Date(dateString);
+
+    // Subtract 5.5 hours from the date object
+    const hoursToSubtract = 5.5; // 5.5 hours
+    dateObj.setTime(dateObj.getTime() - hoursToSubtract * 60 * 60 * 1000);
 
     const day = String(dateObj.getDate()).padStart(2, "0");
     const year = dateObj.getFullYear();
 
     const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
     const month = monthNames[dateObj.getMonth()];
 
@@ -289,7 +309,8 @@ function formatDate(dateString) {
     const time = `${hours}.${minutes}${ampm}`;
 
     return `${day} ${month} ${year} ${time}`;
-  }
+}
+
   const handleSubmit = async(e) => {
     //   e.preventDefault();
         const data1=await fetch(BASE_URL+'/verifyUserAccessForAssessment?assessmentToken='+assessmentToken+'&email='+data?.userAccess?.email)
