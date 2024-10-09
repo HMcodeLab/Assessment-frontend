@@ -85,8 +85,18 @@ const Instructions = ({handleSubmit}) => {
 
 // Assessment Component
 const AssessmentPage = ({ onContinue,data }) => {
-    console.log(data);
-    
+    // console.log(data);
+    function subtractHours(dateStr, hours) {
+        let newDate = new Date(dateStr); // Parse the date in UTC
+        if (isNaN(newDate)) {
+          return 'Invalid Date';
+        }
+        
+        // Subtract the hours in milliseconds (1 hour = 60 minutes * 60 seconds * 1000 milliseconds)
+        newDate.setTime(newDate.getTime() - (hours * 60 * 60 * 1000)); 
+        
+        return newDate.toISOString(); // Return the new date in ISO format (UTC)
+      }
     return (
         <div className="w-full h-full flex flex-col justify-between">
             <div>
@@ -141,12 +151,10 @@ const AssessmentPage = ({ onContinue,data }) => {
             </div>
 
             <div className="flex">
-                {console.log(new Date(),new Date(data?.startDate))
-                }
                 <button
                     type="button"
-                    className={`bg-[rgba(29,191,115,1)] text-white px-6 py-2 rounded-lg h-[60px] w-[575px] `} // Set a fixed width
-                    onClick={onContinue}
+                    className={`bg-[rgba(29,191,115,1)] text-white px-6 py-2 rounded-lg h-[60px] w-[575px] ${new Date()>new Date(subtractHours(data?.startDate,5.5)) && new Date()<new Date(subtractHours(data?.lastDate,5.5))? '':'cursor-not-allowed opacity-50'}`} // Set a fixed width
+                    onClick={()=>new Date()>new Date(subtractHours(data?.startDate,5.5)) && new Date()<new Date(subtractHours(data?.lastDate,5.5)) ? onContinue():''}
                 >
                     Continue To Test
                     <span className="ml-2">→</span>
@@ -217,11 +225,11 @@ const [show, setshow] = useState(false)
     // Subtract 5.5 hours from the future date
     const hoursToSubtract = 5.5; // 5.5 hours
     futureDateObj.setTime(futureDateObj.getTime() - hoursToSubtract * 60 * 60 * 1000);
-    console.log('Adjusted Future Date (UTC):', futureDateObj.toISOString());
+    // console.log('Adjusted Future Date (UTC):', futureDateObj.toISOString());
 
     // Get the current date and time in UTC
     const now = new Date();
-    console.log('Current Date (UTC):', now.toISOString());
+    // console.log('Current Date (UTC):', now.toISOString());
 
     // Calculate the duration in seconds
     const duration = Math.max(Math.floor((futureDateObj.getTime() - now.getTime()) / 1000), 0); // Ensure duration is not negative
@@ -252,9 +260,19 @@ const [show, setshow] = useState(false)
       });
     }, 1000); // Update timer every second
   };
+
+  
   useEffect(() => {
     // Start the timer once the future date is available
     if (futureDate) {
+        // console.log("newdate",new Date());
+        // console.log("startdate",new Date(subtractHours(data?.startDate,5.5)));
+        // console.log("lastdate",new Date(subtractHours(data?.lastDate,5.5)));
+        // console.log("conditionstartdate",new Date()>new Date(subtractHours(data?.startDate,5.5)));
+        // console.log("conditionlastdate",new Date()<new Date(subtractHours(data?.lastDate,5.5)));
+        // console.log("startcondition",new Date()>new Date(data?.startDate));
+        // console.log("lastcondition",new Date()<new Date(data?.lastDate));
+        
       calculateDuration(futureDate);
       startTimer();
     }
