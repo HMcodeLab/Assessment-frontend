@@ -757,34 +757,76 @@ console.log(proctoringActive);
 
 
   // Function to capture the screenshot and store it in the state
+  // const captureScreenshot = () => {
+  //   const element = contentRef.current;
+
+  //   html2canvas(element, {
+  //     useCORS: true,
+  //     scale: 1,
+  //     height:window.innerHeight,
+  //     width:window.innerWidth
+  //   }).then(async (canvas) => {
+  //     canvas.toBlob(async (blob) => {
+  //       if (blob) {
+  //         // Convert Blob to base64
+  //         const base64 = await blobToBase64(blob);
+  //         const key = `screenshots${localStorage.getItem('assessmenttoken')}`;
+
+  //         // Get the existing screenshots from localStorage
+  //         const storedScreenshots = JSON.parse(localStorage.getItem(key)) || [];
+  //         storedScreenshots.push(base64); // Add new base64 string
+
+  //         // Update localStorage
+  //         localStorage.setItem(key, JSON.stringify(storedScreenshots));
+
+  //         // Update the state with the new Blob
+  //         setScreenshots(prevScreenshots => [...prevScreenshots, blob]);
+  //       }
+  //     }, 'image/jpeg', 0.7);
+  //   });
+  // };
+
   const captureScreenshot = () => {
     const element = contentRef.current;
 
+    // Capture the screenshot, including the modal
     html2canvas(element, {
       useCORS: true,
       scale: 1,
-      height:window.innerHeight,
-      width:window.innerWidth
-    }).then(async (canvas) => {
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          // Convert Blob to base64
-          const base64 = await blobToBase64(blob);
-          const key = `screenshots${localStorage.getItem('assessmenttoken')}`;
+      height: window.innerHeight,
+      width: window.innerWidth,
+    })
+      .then(async (canvas) => {
+        canvas.toBlob(
+          async (blob) => {
+            if (blob) {
+              // Convert Blob to base64
+              const base64 = await blobToBase64(blob);
+              const key = `screenshots${localStorage.getItem(
+                "assessmenttoken"
+              )}`;
 
-          // Get the existing screenshots from localStorage
-          const storedScreenshots = JSON.parse(localStorage.getItem(key)) || [];
-          storedScreenshots.push(base64); // Add new base64 string
+              // Get the existing screenshots from localStorage
+              const storedScreenshots =
+                JSON.parse(localStorage.getItem(key)) || [];
+              storedScreenshots.push(base64); // Add new base64 string
 
-          // Update localStorage
-          localStorage.setItem(key, JSON.stringify(storedScreenshots));
+              // Update localStorage
+              localStorage.setItem(key, JSON.stringify(storedScreenshots));
 
-          // Update the state with the new Blob
-          setScreenshots(prevScreenshots => [...prevScreenshots, blob]);
-        }
-      }, 'image/jpeg', 0.7);
-    });
+              // Update the state with the new Blob
+              setScreenshots((prevScreenshots) => [...prevScreenshots, blob]);
+            }
+          },
+          "image/jpeg",
+          0.7
+        );
+      })
+      .catch((error) => {
+        console.error("Error capturing screenshot:", error);
+      });
   };
+
   
   function handleMarkForReview(){
     setdata((prevArr) => {
