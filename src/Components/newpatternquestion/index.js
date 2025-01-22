@@ -805,7 +805,6 @@ console.log(proctoringActive);
               const key = `screenshots${localStorage.getItem(
                 "assessmenttoken"
               )}`;
-              
 
               // Get the existing screenshots from localStorage
               const storedScreenshots =
