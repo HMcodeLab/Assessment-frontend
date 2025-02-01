@@ -377,7 +377,7 @@ function formatDate(dateString) {
               Phone Number
             </label>
           </div>
-          <div className="relative w-[561px]  mt-5">
+          {/* <div className="relative w-[561px]  mt-5">
             <input
               className="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
               type="text"
@@ -388,7 +388,7 @@ function formatDate(dateString) {
             <label className="z-2 text-gray-500 pointer-events-none absolute left-5 top-0 h-fit flex items-center select-none transition-all text-sm px-1 bg-white -translate-y-1/2">
               College name
             </label>
-          </div>
+          </div> */}
           <div className="relative w-[561px] flex mt-5">
             <input
               className="peer transition-all px-5 py-3 w-full text-lg bg-[#f9f9f9] text-gray-600  rounded-md border bo outline-none shadow-[2.0px_3.0px_2.0px_rgba(0,0,0,0.1)]"
