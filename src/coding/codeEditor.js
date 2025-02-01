@@ -110,14 +110,14 @@ const CodeEditor = ({
             className="p-2 rounded bg-green-600 text-white hover:bg-green-700 shadow-lg"
             onClick={Submit}
           >
-            Submit
+            Run 
           </button>
           <button
             onClick={runCode}
             className="flex items-center p-2 rounded-full h-10 w-10 justify-center bg-white   text-black"
           >
             {!show ? (
-              <FontAwesomeIcon className="text-xl" icon={faPlay} />
+              <FontAwesomeIcon className="text-xl" icon={faPlay}  />
             ) : (
               <FaCirclePause className="text-3xl" />
             )}
