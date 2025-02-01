@@ -350,93 +350,106 @@ const [show, setshow] = useState(false)
       
     };
     return (
-        <div className="min-h-screen bg-[rgba(29,191,115,1)] flex justify-center items-center px-4 sm:px-8 md:px-16 lg:px-24">
-            <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg flex xsm:flex-col lg:flex-row overflow-hidden">
-
-                {/* Left Section */}
-                <div className="w-full lg:w-1/3 bg-[rgba(29,191,115,0.25)] p-8 flex flex-col justify-between">
-                   
-                    {
-
-                        timer!==0 ?  <div>
-                        <h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">Your Test Will Be Live in</h2>
-                        <div
-                            className="bg-black text-white text-center rounded-lg w-fit mx-auto height-Hug[134.66px]  p-6 mb-8"
-                            style={{
-                                boxShadow: '0 10px 30px rgba(128, 0, 128, 1), 0 15px 45px rgba(255, 255, 255, 0)',
-                            }}
-                        >
-                            <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
-                            {!show ? formatTime(timer):''}
-
-                            </div>
-                        </div>
-
-                    </div>:
-                     new Date() > new Date(data?.lastDate) ?
-
-<div>
-<h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]"> Your test has been expired on</h2>
-<div
-    className="bg-black text-white text-center rounded-lg w-fit mx-auto height-Hug[134.66px]  p-6 mb-8"
-    style={{
-        boxShadow: '0 10px 30px rgba(128, 0, 128, 1), 0 15px 45px rgba(255, 255, 255, 0)',
-    }}
->
-    <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
-    { formatDate(data?.lastDate)}
-
-    </div>
-</div>
-
-</div>:<div>
-<h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">  Your Test Will End On</h2>
-<div
-    className="bg-black text-white text-center rounded-lg w-fit mx-auto height-Hug[134.66px]  p-6 mb-8"
-    style={{
-        boxShadow: '0 10px 30px rgba(128, 0, 128, 1), 0 15px 45px rgba(255, 255, 255, 0)',
-    }}
->
-    <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
-    {!show ? formatDate(data?.lastDate):''}
-
-    </div>
-</div>
-
-</div>
-                    }
-                  
-
-                    <div className="text-center text-black">
-                        <img src="/image/log.png" alt="Hoping Minds Logo" className="w-[189px] h-[73.16px] mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold font-poppins mb-4 text-[24px]">Contact Us For Support</h3>
-                        <div className="flex items-center mb-2">
-                            <MdEmail className="text-[rgba(60,60,60,1)] mr-2" size={20} /> {/* Email icon */}
-                            <p className="font-poppins text-[rgba(60,60,60,1)]">support@hopingminds.com</p>
-                        </div>
-                        <div className="flex items-center">
-                            <MdPhone className="text-[rgba(60,60,60,1)] mr-2" size={20} /> {/* Phone icon */}
-                            <p className="font-poppins text-[rgba(60,60,60,1)]">90560-22600, 9139100050</p>
-                        </div>
-
-                    </div>
+      <div className="min-h-screen bg-[rgba(29,191,115,1)] flex justify-center items-center px-4 sm:px-8 md:px-16 lg:px-24">
+        <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg flex xsm:flex-col lg:flex-row overflow-hidden">
+          {/* Left Section */}
+          <div className="w-full lg:w-1/3 bg-[rgba(29,191,115,0.25)] p-8 flex flex-col justify-between">
+            {timer !== 0 ? (
+              <div>
+                <h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">
+                  Your Test Will Be Live in
+                </h2>
+                <div
+                  className="bg-black text-white text-center rounded-lg w-fit mx-auto height-Hug[134.66px]  p-6 mb-8"
+                  style={{
+                    boxShadow:
+                      "0 10px 30px rgba(128, 0, 128, 1), 0 15px 45px rgba(255, 255, 255, 0)",
+                  }}
+                >
+                  <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
+                    {!show ? formatTime(timer) : ""}
+                  </div>
                 </div>
-
-                {/* Right Section */}
-                <div className="w-full lg:w-2/3 p-8 h-[600px] overflow-y-auto">
-                    {!isAssessmentComplete ? (
-                        <AssessmentPage onContinue={handleContinue} data={data}/>
-                    ) : (
-                        <Instructions handleSubmit={handleSubmit}/>
-                    )}
+              </div>
+            ) : new Date() > new Date(data?.lastDate) ? (
+              <div>
+                <h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">
+                  {" "}
+                  Your test has been expired on
+                </h2>
+                <div
+                  className="bg-black text-white text-center rounded-lg w-fit mx-auto height-Hug[134.66px]  p-6 mb-8"
+                  style={{
+                    boxShadow:
+                      "0 10px 30px rgba(128, 0, 128, 1), 0 15px 45px rgba(255, 255, 255, 0)",
+                  }}
+                >
+                  <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
+                    {formatDate(data?.lastDate)}
+                  </div>
                 </div>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-lg  mb-4 text-center font-Poppins text-[rgba(0,0,0,1)]">
+                  {" "}
+                  Your Test Will End On
+                </h2>
+                <div
+                  className="bg-black text-white text-center rounded-lg w-fit mx-auto height-Hug[134.66px]  p-6 mb-8"
+                  style={{
+                    boxShadow:
+                      "0 10px 30px rgba(128, 0, 128, 1), 0 15px 45px rgba(255, 255, 255, 0)",
+                  }}
+                >
+                  <div className="flex gap-2 justify-center space-x-2 text-2xl font-bold">
+                    {!show ? formatDate(data?.lastDate) : ""}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="text-center text-black">
+              <img
+                src="/image/log.png"
+                alt="Hoping Minds Logo"
+                className="w-[189px] h-[73.16px] mx-auto mb-4"
+              />
+              <h3 className="text-lg font-semibold font-poppins mb-4 text-[24px]">
+                Contact Us For Support
+              </h3>
+              <div className="flex items-center mb-2">
+                <MdEmail className="text-[rgba(60,60,60,1)] mr-2" size={20} />{" "}
+                {/* Email icon */}
+                <p className="font-poppins text-[rgba(60,60,60,1)]">
+                  support@hopingminds.com
+                </p>
+              </div>
+              <div className="flex items-center">
+                <MdPhone className="text-[rgba(60,60,60,1)] mr-2" size={20} />{" "}
+                {/* Phone icon */}
+                <p className="font-poppins text-[rgba(60,60,60,1)]">
+                  76578-22600, 7717667030
+                </p>
+              </div>
             </div>
-            {show && (
+          </div>
+
+          {/* Right Section */}
+          <div className="w-full lg:w-2/3 p-8 h-[600px] overflow-y-auto">
+            {!isAssessmentComplete ? (
+              <AssessmentPage onContinue={handleContinue} data={data} />
+            ) : (
+              <Instructions handleSubmit={handleSubmit} />
+            )}
+          </div>
+        </div>
+        {show && (
           <div className="w-full h-screen fixed top-0 left-0 bg-[#b4cca1] opacity-80">
             <Spinner />
           </div>
         )}
-        </div>
+      </div>
     );
 };
 
