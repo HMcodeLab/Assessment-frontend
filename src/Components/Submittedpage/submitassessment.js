@@ -98,13 +98,13 @@ body:JSON.stringify(formData)
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DBF73] text-white">
                   <FaPhoneAlt className="text-xl" />
                 </div>
- 
-                <div className='flex flex-col items-center justify-center'>
+
+                <div className="flex flex-col items-center justify-center">
                   <h2 className="text-gray-800 text-lg font-semibold">
-                    +91 90560-22600
+                    +91 76578-22600
                   </h2>
                   <h2 className="text-gray-800 text-lg font-semibold">
-                    +91 91391-00050
+                    +91 77176-67030
                   </h2>
                 </div>
               </div>

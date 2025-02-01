@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
-import { BASE_URL } from '../../Api';
-import toast, { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { FaPhoneAlt, FaEnvelope } from "react-icons/fa";
+import { BASE_URL } from "../../Api";
+import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Suspended = () => {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone_number: '',
-    feedback: '',
+    name: "",
+    email: "",
+    phone_number: "",
+    feedback: "",
   });
 
   const [errors, setErrors] = useState({
-    name: '',
-    email: '',
-    phone_number: '',
-    feedback: '',
+    name: "",
+    email: "",
+    phone_number: "",
+    feedback: "",
   });
 
   const validateForm = () => {
@@ -27,32 +27,32 @@ const Suspended = () => {
     // Name validation
     if (!formData.name.trim()) {
       formIsValid = false;
-      tempErrors.name = 'Name is required';
+      tempErrors.name = "Name is required";
     }
 
     // Email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
       formIsValid = false;
-      tempErrors.email = 'Email is required';
+      tempErrors.email = "Email is required";
     } else if (!emailPattern.test(formData.email)) {
       formIsValid = false;
-      tempErrors.email = 'Please enter a valid email';
+      tempErrors.email = "Please enter a valid email";
     }
 
     // Phone number validation
     if (!formData.phone_number.trim()) {
       formIsValid = false;
-      tempErrors.phone_number = 'Phone number is required';
+      tempErrors.phone_number = "Phone number is required";
     } else if (!/^\+?\d{10}$/.test(formData.phone_number)) {
       formIsValid = false;
-      tempErrors.phone_number = 'Phone number is invalid';
+      tempErrors.phone_number = "Phone number is invalid";
     }
 
     // Feedback validation
     if (!formData.feedback.trim()) {
       formIsValid = false;
-      tempErrors.feedback = 'Feedback is required';
+      tempErrors.feedback = "Feedback is required";
     }
 
     setErrors(tempErrors);
@@ -66,51 +66,72 @@ const Suspended = () => {
     });
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-   const data=await fetch(BASE_URL+'/submitUserFeedback',{
-        method:'POST',
-        headers:{
-          'Content-type':'application/json',
+      const data = await fetch(BASE_URL + "/submitUserFeedback", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
         },
-body:JSON.stringify(formData)
-      })
-      const response=await data.json();
-      if(response.success){
-          toast.success(response.message)
-          setFormData({name:'',phone_number:'',feedback:'',email:''})
-      }
-      else{
-        toast.error(response.message)
-      }      // Proceed with form submission logic (e.g., API call)
+        body: JSON.stringify(formData),
+      });
+      const response = await data.json();
+      if (response.success) {
+        toast.success(response.message);
+        setFormData({ name: "", phone_number: "", feedback: "", email: "" });
+      } else {
+        toast.error(response.message);
+      } // Proceed with form submission logic (e.g., API call)
     } else {
-      console.log('Form has errors:', errors);
+      console.log("Form has errors:", errors);
     }
   };
-function handleResume(){
- 
-  navigate('/question')
-}
+  function handleResume() {
+    navigate("/question");
+  }
   return (
     <div className="h-screen bg-gray-50 py-10 px-4 w-full overflow-y-hidden">
-      <Toaster/>
+      <Toaster />
       <div className="flex items-center justify-center gap-5 mx-auto xsm:flex-col">
         {/* Left: Image and Text */}
         <div className="md:w-1/2 flex justify-center items-center flex-col">
           <img width="188" height="188" src="/suspended.png" alt="suspended" />
-          <h1 className="text-red-600 font-semibold text-2xl mt-4 ">Assessment Suspended</h1>
-          <button className='bg-[#1DBF73] text-white rounded p-3 mt-5' onClick={handleResume}>Resume Test</button>
+          <h1 className="text-red-600 font-semibold text-2xl mt-4 ">
+            Assessment Suspended
+          </h1>
+          <button
+            className="bg-[#1DBF73] text-white rounded p-3 mt-5"
+            onClick={handleResume}
+          >
+            Resume Test
+          </button>
           <div className="mt-12 rounded-lg p-8 max-w-6xl mx-auto">
-            <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">Contact Us</h3>
+            <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">
+              Contact Us
+            </h3>
             <div className="space-y-4 text-center">
-              <div className="flex items-center justify-start">
-                <FaPhoneAlt className="text-[#1DBF73] text-lg mr-3" />
-                <span className="text-gray-700 text-lg">90560-22600, 9139100050</span>
+              <div className="flex items-center space-x-4 p-3 rounded-lg shadow-md bg-white hover:bg-gray-100 transition duration-300">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DBF73] text-white">
+                  <FaPhoneAlt className="text-xl" />
+                </div>
+
+                <div className="flex flex-col items-center justify-center">
+                  <h2 className="text-gray-800 text-lg font-semibold">
+                    +91 76578-22600
+                  </h2>
+                  <h2 className="text-gray-800 text-lg font-semibold">
+                    +91 77176-67030
+                  </h2>
+                </div>
               </div>
-              <div className="flex items-center justify-start">
-                <FaEnvelope className="text-[#1DBF73] text-lg mr-3" />
-                <span className="text-gray-700 text-lg">support@hopingminds.com</span>
+              <div className="flex items-center space-x-4 p-3 rounded-lg shadow-md bg-white hover:bg-gray-100 transition duration-300">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DBF73] text-white">
+                  <FaEnvelope className="text-xl" />
+                </div>
+                <span className="text-gray-800 text-lg font-semibold">
+                  support@hopingminds.com
+                </span>
               </div>
             </div>
           </div>
