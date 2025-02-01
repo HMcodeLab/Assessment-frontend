@@ -79,31 +79,55 @@ body:JSON.stringify(formData)
   // }
   return (
     <div className="h-screen bg-gray-50 py-10 px-4 w-full overflow-y-hidden">
-      <Toaster/>
+      <Toaster />
       {/* Left: Image and Text, Right: Feedback Form */}
       <div className="flex items-center justify-center gap-5 mx-auto xsm:flex-col">
         {/* Left: Image and Text */}
-        <div className='md:w-1/2 flex justify-center items-center flex-col '>
+        <div className="md:w-1/2 flex justify-center items-center flex-col ">
           <img width="188" height="188" src="/ok.gif" alt="submitted" />
-          <h1 className='text-[#1DBF73] font-semibold text-2xl mt-4'>Assessment Submitted</h1>
+          <h1 className="text-[#1DBF73] font-semibold text-2xl mt-4">
+            Assessment Submitted
+          </h1>
           {/* <button className='bg-[#1DBF73] text-white rounded p-3 mt-5' onClick={handleResume}>Resume Test</button> */}
           <div className="mt-12 rounded-lg p-8 max-w-6xl mx-auto">
-            <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">Contact Us</h3>
+            <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">
+              Contact Us
+            </h3>
             <div className="space-y-4 text-center">
-              <div className="flex items-center justify-start">
-                <FaPhoneAlt className="text-[#1DBF73] text-lg mr-3" />
-                <span className="text-gray-700 text-lg">90560-22600, 9139100050</span>
+              <div className="flex items-center space-x-4 p-3 rounded-lg shadow-md bg-white hover:bg-gray-100 transition duration-300">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DBF73] text-white">
+                  <FaPhoneAlt className="text-xl" />
+                </div>
+ 
+                <div className='flex flex-col items-center justify-center'>
+                  <h2 className="text-gray-800 text-lg font-semibold">
+                    +91 90560-22600
+                  </h2>
+                  <h2 className="text-gray-800 text-lg font-semibold">
+                    +91 91391-00050
+                  </h2>
+                </div>
               </div>
-              <div className="flex items-center justify-start">
-                <FaEnvelope className="text-[#1DBF73] text-lg mr-3" />
-                <span className="text-gray-700 text-lg">support@hopingminds.com</span>
+
+              <div className="flex items-center space-x-4 p-3 rounded-lg shadow-md bg-white hover:bg-gray-100 transition duration-300">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DBF73] text-white">
+                  <FaEnvelope className="text-xl" />
+                </div>
+                <span className="text-gray-800 text-lg font-semibold">
+                  support@hopingminds.com
+                </span>
               </div>
             </div>
           </div>
+
+          {/* <button className="relative px-6 py-3 text-white bg-green-600 border-2 border-green-600 rounded-lg overflow-hidden transition-all duration-300 ease-in-out hover:text-green-600 hover:bg-white">
+            <span className="absolute inset-0 border-2 border-green-600 scale-0 transition-transform duration-300 ease-in-out group-hover:scale-100"></span>
+            Start Your Coding Test
+          </button> */}
         </div>
 
         {/* Right: Feedback Form */}
-        <div className="bg-white rounded-lg shadow-xl p-8 w-[40%] mt-5 md:mt-0 xsm:w-full max-h-[90vh] overflow-y-auto scrollbarnumber2">
+        {/* <div className="bg-white rounded-lg shadow-xl p-8 w-[40%] mt-5 md:mt-0 xsm:w-full max-h-[90vh] overflow-y-auto scrollbarnumber2">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
             We'd Love Your Feedback
           </h2>
@@ -179,7 +203,7 @@ body:JSON.stringify(formData)
               Submit Feedback
             </button>
           </form>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -14,18 +14,22 @@ import First from './Components/Enterancepage/First';
 import TestApp from './Components/Enterancepage/AssessmentPage';
 import ScreenshotTest from './Components/screenshot';
 import FeedbackForm from './Components/Contactus';
+import CodingAssessment from './coding/codingAssessment';
+import StartTest from './coding/StartTest';
 
 function App() {
   return (
     <BrowserRouter>
-    <Routes>
-      <Route path='/' element={<TestApp/>}/>
-      <Route path='/hardwarechecking' element={<DeviceCheckPage/>}/>
-      <Route path='/question' element={<NewQuestion/>}/>
-      <Route path='/submitted' element={<Submittedassessment/>}/>
-      <Route path='/suspended' element={<Suspended/>}/>
-      <Route path='/nmquestion' element={<Normalassessment/>}/>
-    </Routes>
+      <Routes>
+        <Route path="/" element={<TestApp />} />
+        <Route path="/hardwarechecking" element={<DeviceCheckPage />} />
+        <Route path="/question" element={<NewQuestion />} />
+        <Route path="/submitted" element={<Submittedassessment />} />
+        <Route path="/suspended" element={<Suspended />} />
+        <Route path="/nmquestion" element={<Normalassessment />} />
+        <Route path="/start-coding" element={<StartTest />} />
+        <Route path="/coding-assessment" element={<CodingAssessment />} />
+      </Routes>
     </BrowserRouter>
   );
 }

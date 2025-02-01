@@ -6,11 +6,14 @@ import { json, useNavigate, useSearchParams } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import Modal from "react-modal";
 import { ImCross } from "react-icons/im";
-import { BASE_URL } from "../../Api";
-import Spinner from "../Spinner";
-import Watermark from "../temp";
+import { BASE_URL } from "../Api";
+// import Spinner from "./Spinner/index/";
 import { SlRefresh } from "react-icons/sl";
 import html2canvas from "html2canvas";
+import Watermark from "./temp";
+import { MdDone } from "react-icons/md";
+import CodeEditor from "./codeEditor";
+import Spinner from "./Spinner/Spinner";
 const base64ToBlob = (base64, contentType = "image/jpeg") => {
   const byteCharacters = atob(base64.split(",")[1]);
   const byteNumbers = new Array(byteCharacters.length);
@@ -22,8 +25,7 @@ const base64ToBlob = (base64, contentType = "image/jpeg") => {
   const byteArray = new Uint8Array(byteNumbers);
   return new Blob([byteArray], { type: contentType });
 };
-export default function NewQuestion() {
-  const [haveCodingAssessment, setHaveCodingAssessment] = useState(false);
+export default function CodingAssessment() {
   const [enablefullscreen, setenablefullscreen] = useState(false);
   const [showtimer, setshowtimer] = useState(true);
   const [Selected, setSelected] = useState();
@@ -39,7 +41,7 @@ export default function NewQuestion() {
     if (storedScreenshots) {
       // Convert base64 strings back to Blob objects if data exists
       const parsedScreenshots = JSON.parse(storedScreenshots);
-      return parsedScreenshots.map((base64) => base64ToBlob(base64));
+      return parsedScreenshots?.map((base64) => base64ToBlob(base64));
     }
 
     // If no screenshots found, initialize state with an empty array
@@ -71,6 +73,13 @@ export default function NewQuestion() {
   const [micblocked, setmicblocked] = useState();
   const [showalert, setshowalert] = useState(true);
   const [assessmentname, setassessmentname] = useState();
+  const [allquestions, setallquestions] = useState([]);
+  const [currentindex, setcurrentindex] = useState(0);
+  const [testcaseindex, settestcaseindex] = useState(0);
+  const [output, setoutput] = useState([]);
+  const [compiledcode, setcompiledcode] = useState("");
+  const [language, setlanguage] = useState("javascript");
+  const [showSpinner, setshowSpinner] = useState(false);
   const [ProctoringScore, setProctoringScore] = useState({
     mic: 0,
     webcam: 0,
@@ -129,9 +138,9 @@ export default function NewQuestion() {
 
   async function Fetchdata() {
     try {
-      let url = `${BASE_URL}/getAssesmentAllQuestions`;
-      setshow(true);
+      let url = `${BASE_URL}/getAllCodingAssesmentQuestions`;
 
+      setshow(true);
       const data = await fetch(url, {
         method: "GET",
         headers: {
@@ -139,32 +148,50 @@ export default function NewQuestion() {
           "Content-Type": "application/json",
         },
       });
-
       const response = await data.json();
 
       if (response.success) {
         setshow(false);
         setassessmentname(response?.Assessment?.assessmentName);
 
-        // Store haveCodingAssessment state
-        setHaveCodingAssessment(
-          response?.Assessment?.haveCodingAssessment || false
-        );
-
         const newProctoringActive = {};
         Object.keys(response?.Assessment?.ProctoringFor).forEach((key) => {
           newProctoringActive[key] =
             response?.Assessment?.ProctoringFor[key].inUse;
         });
-
         setProctoringActive(newProctoringActive);
+
+        // console.log("API Response:", response);
+        // console.log("Problems:", response?.problems);
+
+        if (response.problems && Array.isArray(response.problems)) {
+          setdata(response);
+          setallquestions(response.problems);
+        } else {
+          console.error("Invalid problem data structure:", response.problems);
+        }
 
         let checkdata = localStorage.getItem(
           "data" + localStorage.getItem("assessmenttoken")
         );
-        setdata(checkdata ? JSON.parse(checkdata) : response?.questions);
+        if (checkdata) {
+          let parsed = JSON.parse(checkdata);
+          console.log("Problem data is coming", response?.problems);
+          setdata(parsed);
+          setcompiledcode(
+            response?.problems[currentindex]?.problem?.initial_user_func[
+              language
+            ]?.initial_code
+          );
+        } else {
+          setcompiledcode(
+            response?.problems[currentindex]?.problem?.initial_user_func[
+              language
+            ]?.initial_code
+          );
+        }
 
-        setLength(response?.totalQuestions);
+        setLength(response?.total_problem);
       } else {
         setshowtimer(false);
         toast.error(response?.message);
@@ -174,71 +201,10 @@ export default function NewQuestion() {
     }
   }
 
-  // Run Fetchdata only once when the component mounts
-  useEffect(() => {
-    Fetchdata();
-  }, []);
-
-  async function handleClick(status, remarks) {
-    setshow(true);
-    let formdata = new FormData();
-    formdata.append("isSuspended", status);
-    formdata.append("ProctoringScore", JSON.stringify(ProctoringScore));
-    formdata.append("remarks", remarks);
-    formdata.append("lastindex", index);
-
-    const filteredQuestions = data
-      .filter((question) => question.isSubmitted)
-      .map((question, index) => ({
-        index: index + 1,
-        answer: question.submittedAnswer,
-      }));
-
-    formdata.append("answers", JSON.stringify(filteredQuestions));
-
-    screenshots.forEach((blob, index) => {
-      const file = new File([blob], `screenshot_${index}.jpeg`, {
-        type: "image/jpeg",
-      });
-      formdata.append("userScreenshots", file);
-    });
-
-    try {
-      let url = `${BASE_URL}/finishAssessment`;
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: formdata,
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setshow(false);
-
-        if (haveCodingAssessment) {
-          // Redirect to coding assessment
-          // window.location.replace("/coding-assessment");
-          window.location.replace("/start-coding");
-        } else {
-          // Normal flow - Redirect to submitted page
-          toast.success("Submitted Successfully");
-          window.location.replace("/submitted");
-        }
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   // async function Fetchdata() {
   //   try {
-  //     let url = `${BASE_URL}/getAssesmentAllQuestions`;
+  //     let url = `${BASE_URL}/getAllCodingAssesmentQuestions`;
+
   //     setshow(true);
   //     // setindex(params.get("index"))
   //     const data = await fetch(url, {
@@ -258,7 +224,7 @@ export default function NewQuestion() {
   //         newProctoringActive[key] =
   //           response?.Assessment?.ProctoringFor[key].inUse;
   //       });
-  //       // console.log(newProctoringActive);
+  //       console.log("hello checkdata", newProctoringActive);
 
   //       setProctoringActive(newProctoringActive);
   //       let checkdata = localStorage.getItem(
@@ -266,13 +232,28 @@ export default function NewQuestion() {
   //       );
   //       if (checkdata) {
   //         // console.log(checkdata,JSON.parse(checkdata));
+  //         let parsed = JSON.parse(checkdata);
+  //         console.log("problem data is comming ",response.problems);
 
   //         setdata(JSON.parse(checkdata));
+  //         setcompiledcode(
+  //           response?.problems[currentindex]?.problem?.initial_user_func[
+  //             language
+  //           ]?.initial_code
+  //         );
   //       } else {
-  //         setdata(response?.questions);
+  //         setdata(response);
+  //         setallquestions(response?.problems);
+  //         // console.log("starting",response?.problems[currentindex]?.problem?.initial_user_func[language]?.initial_code);
+
+  //         setcompiledcode(
+  //           response?.problems[currentindex]?.problem?.initial_user_func[
+  //             language
+  //           ]?.initial_code
+  //         );
   //       }
 
-  //       setLength(response?.totalQuestions);
+  //       setLength(response?.total_problem);
   //     } else {
   //       setshowtimer(false);
   //       toast.error(response?.message);
@@ -433,124 +414,67 @@ export default function NewQuestion() {
       "lastindex" + localStorage.getItem("assessmenttoken"),
       index + 1
     );
-
     setindex((prev) => prev + 1);
 
     // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
   };
 
-  function Nextquestion() {
-    if (index < Length) {
-      // Fetchdata();
-      setdata((prevArr) => {
-        const newArr = [...prevArr]; // Create a shallow copy of the array
-        newArr[index] = { ...newArr[index], isVisited: true }; // Update the specific object
-        localStorage.setItem(
-          "data" + localStorage.getItem("assessmenttoken"),
-          JSON.stringify(newArr)
-        );
-
-        return newArr; // Set the updated array
-      });
-      localStorage.setItem(
-        "lastindex" + localStorage.getItem("assessmenttoken"),
-        index + 1
-      );
-      if (data[index]?.markForReview || data[index]?.isSubmitted) {
-        setSelected(data[index]?.submittedAnswer);
-      } else {
-        setSelected("");
-      }
-      setindex((prev) => prev + 1);
-      // navigate(`/question?index=${index + 1}&t=${params.get('t')}`);
-    }
-  }
-
-  function Previousquestion() {
-    if (index >= 1) {
-      setdata((prevArr) => {
-        const newArr = [...prevArr]; // Create a shallow copy of the array
-        newArr[index] = { ...newArr[index], isVisited: true }; // Update the specific object
-        localStorage.setItem(
-          "data" + localStorage.getItem("assessmenttoken"),
-          JSON.stringify(newArr)
-        );
-        return newArr; // Set the updated array
-      });
-      localStorage.setItem(
-        "lastindex" + localStorage.getItem("assessmenttoken"),
-        index - 1
-      );
-
-      if (data[index - 1]?.markForReview || data[index - 1]?.isSubmitted) {
-        setSelected(data[index - 1]?.submittedAnswer);
-      } else {
-        setSelected("");
-      }
-      setindex((prev) => prev - 1);
-    }
-  }
-
   // async function handleClick(status, remarks) {
   //   setshow(true);
-  //   let formdata = new FormData();
-  //   formdata.append("isSuspended", status);
-  //   formdata.append("ProctoringScore", JSON.stringify(ProctoringScore));
-  //   formdata.append("remarks", remarks);
-  //   formdata.append("lastindex", index);
 
-  //   const filteredQuestions = data
-  //     .filter((question) => question.isSubmitted)
-  //     .map((question, index) => ({
-  //       index: index + 1,
-  //       answer: question.submittedAnswer,
-  //     }));
+  //   // Prepare the data in the required format
+  //   const data = {
+  //     isSuspended: status,
+  //     remarks: remarks,
+  //     submissionTime: Math.floor(timer / 60),
+  //     ProctoringScore: {
+  //       mic: 85,
+  //       webcam: 90,
+  //       TabSwitch: 5,
+  //       multiplePersonInFrame: 0,
+  //       PhoneinFrame: 0,
+  //       SoundCaptured: 10,
+  //     },
+  //   };
 
-  //   formdata.append("answers", JSON.stringify(filteredQuestions));
-
-  //   screenshots.forEach((blob, index) => {
+  //   // Add the screenshots if they exist
+  //   const formData = new FormData();
+  //   screenshots?.forEach((blob, index) => {
   //     const file = new File([blob], `screenshot_${index}.jpeg`, {
   //       type: "image/jpeg",
   //     });
-  //     formdata.append("userScreenshots", file);
+  //     formData.append("userScreenshots", file);
   //   });
 
   //   try {
-  //     // Submit the current assessment
-  //     let url = `${BASE_URL}/finishAssessment`;
+  //     let url = `${BASE_URL}/finishCodingAssessment`;
+
   //     const response = await fetch(url, {
-  //       method: "PUT",
+  //       method: "POST",
   //       headers: {
   //         Accept: "application/json",
   //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json",
   //       },
-  //       body: formdata,
+  //       body: JSON.stringify(data),
   //     });
 
   //     const result = await response.json();
 
-  //     if (result.success) {
+  //     if (result?.success) {
   //       setshow(false);
+  //       localStorage.setItem(
+  //         "warnings" + localStorage.getItem("assessmenttoken"),
+  //         3
+  //       );
+  //       localStorage.removeItem(
+  //         "screenshots" + localStorage.getItem("assessmenttoken")
+  //       );
 
-  //       // Check for haveCodingAssessment
-  //       let fetchResponse = await fetch(`${BASE_URL}/getAssesmentAllQuestions`, {
-  //         method: "GET",
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-
-  //       let fetchResult = await fetchResponse.json();
-
-  //       if (
-  //         fetchResult.success &&
-  //         fetchResult?.Assessment?.haveCodingAssessment
-  //       ) {
-  //         // Redirect to coding assessment
-  //         window.location.replace("/coding-assessment");
+  //       if (status) {
+  //         toast.error("Suspended!");
+  //         window.location.replace("/suspended");
   //       } else {
-  //         // Normal flow - Redirect to submitted page
   //         toast.success("Submitted Successfully");
   //         window.location.replace("/submitted");
   //       }
@@ -558,78 +482,91 @@ export default function NewQuestion() {
   //       toast.error(result.message);
   //     }
   //   } catch (error) {
-  //     console.log(error);
+  //     toast.error("An error occurred");
   //   }
   // }
 
-  // async function handleClick(status, remarks) {
-  //   // console.log(screenshots);
-  //   setshow(true);
-  //   let formdata = new FormData();
-  //   formdata.append("isSuspended", status);
-  //   formdata.append("ProctoringScore", JSON.stringify(ProctoringScore));
-  //   formdata.append("remarks", remarks);
-  //   formdata.append("lastindex", index);
-  //   const filteredQuestions = data
-  //     .filter((question) => question.isSubmitted)
-  //     .map((question, index) => ({
-  //       index: index + 1,
-  //       answer: question.submittedAnswer,
-  //     }));
-  //   formdata.append("answers", JSON.stringify(filteredQuestions));
-  //   // console.log(filteredQuestions);
+  async function handleClick(status, remarks) {
+    // console.log(screenshots);
+    setshow(true);
+    let formdata = new FormData();
+    formdata.append("isSuspended", status);
+    formdata.append("ProctoringScore", JSON.stringify(ProctoringScore));
+    formdata.append("remarks", remarks);
+    formdata.append("submissionTime", timer / 60);
+    // formdata.append('lastindex',index)
 
-  //   // const filesArray = [];
-  //   screenshots.forEach((blob, index) => {
-  //     const file = new File([blob], `screenshot_${index}.jpeg`, {
-  //       type: "image/jpeg",
-  //     });
-  //     formdata.append("userScreenshots", file);
-  //   });
-  //   try {
-  //     let url = `${BASE_URL}/finishAssessment`;
-  //     const data = await fetch(url, {
-  //       method: "PUT",
-  //       headers: {
-  //         Accept: "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: formdata,
-  //     });
-  //     const response = await data.json();
-  //     if (response.success) {
-  //       setshow(false);
-  //       // localStorage.removeItem(localStorage.getItem('assessmenttoken'))
-  //       // localStorage.clear();
+    // console.log(filteredQuestions);
 
-  //       if (status) {
-  //         toast.error("Suspended!");
-  //         localStorage.setItem(
-  //           "warnings" + localStorage.getItem("assessmenttoken"),
-  //           3
-  //         );
-  //         localStorage.removeItem(
-  //           "screenshots" + localStorage.getItem("assessmenttoken")
-  //         );
-  //         window.location.replace("/suspended");
-  //       } else {
-  //         localStorage.setItem(
-  //           "warnings" + localStorage.getItem("assessmenttoken"),
-  //           3
-  //         );
-  //         localStorage.removeItem(
-  //           "screenshots" + localStorage.getItem("assessmenttoken")
-  //         );
-  //         toast.success("Submitted Successfully");
-  //         window.location.replace("/submitted");
-  //       }
-  //     } else {
-  //       toast.error(response.message);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
+    const filesArray = [];
+    screenshots.forEach((blob, index) => {
+      const file = new File([blob], `screenshot_${index}.jpeg`, {
+        type: "image/jpeg",
+      });
+      formdata.append("userScreenshots", file);
+    });
+    try {
+      let url = `${BASE_URL}/finishCodingAssessment`;
+
+      // Create form data
+      let formdata = new FormData();
+      formdata.append("isCodingAssessmentSuspended", false);
+      formdata.append("remarks", "This is the remark for the assessment");
+      formdata.append("submissionTime", 345);
+      formdata.append(
+        "ProctoringScore",
+        JSON.stringify({
+          mic: 85,
+          webcam: 90,
+          TabSwitch: 5,
+          multiplePersonInFrame: 0,
+          PhoneinFrame: 0,
+          SoundCaptured: 10,
+        })
+      );
+
+      const data = await fetch(url, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formdata,
+      });
+
+      const response = await data.json();
+      if (response.success) {
+        setshow(false);
+
+        if (status) {
+          toast.error("Suspended!");
+          localStorage.setItem(
+            "warnings" + localStorage.getItem("assessmenttoken"),
+            3
+          );
+          localStorage.removeItem(
+            "screenshots" + localStorage.getItem("assessmenttoken")
+          );
+          window.location.replace("/suspended");
+        } else {
+          localStorage.setItem(
+            "warnings" + localStorage.getItem("assessmenttoken"),
+            3
+          );
+          localStorage.removeItem(
+            "screenshots" + localStorage.getItem("assessmenttoken")
+          );
+          toast.success("Submitted Successfully");
+          window.location.replace("/submitted");
+        }
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.error("Error submitting assessment:", error);
+      toast.error("Something went wrong. Please try again.");
+    }
+  }
 
   const [audio] = useState(new Audio("/danger.mp3"));
 
@@ -715,7 +652,7 @@ export default function NewQuestion() {
       const isFunctionKey = key.startsWith("F") && key.length === 2; // Function keys (F1-F12)
       const isControlKey =
         event.ctrlKey || event.altKey || event.metaKey || event.shiftKey; // Ctrl, Alt, Cmd, Shift
-      console.log(proctoringActive);
+      // console.log(proctoringActive);
 
       if (
         (isFunctionKey || isControlKey) &&
@@ -758,12 +695,10 @@ export default function NewQuestion() {
 
           // enterFullScreen();
         }
-        audio
-          .play()
-          .catch((error) => console.error("Error playing audio:", error));
+        // audio.play().catch(error => console.error('Error playing audio:', error));
       } else {
         document.title = "Online Test";
-        audio.pause();
+        // audio.pause();
       }
     };
 
@@ -993,28 +928,6 @@ export default function NewQuestion() {
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
     };
   }, [enablefullscreen]);
-  function handleQuestionNumber(ind) {
-    setdata((prevArr) => {
-      const newArr = [...prevArr]; // Create a shallow copy of the array
-      newArr[ind] = { ...newArr[ind], isVisited: true }; // Update the specific object
-      localStorage.setItem(
-        "data" + localStorage.getItem("assessmenttoken"),
-        JSON.stringify(newArr)
-      );
-      return newArr; // Set the updated array
-    });
-    localStorage.setItem(
-      "lastindex" + localStorage.getItem("assessmenttoken"),
-      ind
-    );
-
-    setindex(ind);
-    if (data[ind]?.markForReview || data[ind]?.isSubmitted) {
-      setSelected(data[ind]?.submittedAnswer);
-    } else {
-      setSelected("");
-    }
-  }
 
   // Function to capture the screenshot and store it in the state
   const captureScreenshot = () => {
@@ -1051,72 +964,129 @@ export default function NewQuestion() {
     });
   };
 
-  // const captureScreenshot = () => {
-  //   const element = contentRef.current;
-
-  //   // Capture the screenshot, including the modal
-  //   html2canvas(element, {
-  //     useCORS: true,
-  //     scale: 1,
-  //     height: window.innerHeight,
-  //     width: window.innerWidth,
-  //   })
-  //     .then(async (canvas) => {
-  //       canvas.toBlob(
-  //         async (blob) => {
-  //           if (blob) {
-  //             // Convert Blob to base64
-  //             const base64 = await blobToBase64(blob);
-  //             const key = `screenshots${localStorage.getItem(
-  //               "assessmenttoken"
-  //             )}`;
-
-  //             // Get the existing screenshots from localStorage
-  //             const storedScreenshots =
-  //               JSON.parse(localStorage.getItem(key)) || [];
-  //             storedScreenshots.push(base64); // Add new base64 string
-
-  //             // Update localStorage
-  //             localStorage.setItem(key, JSON.stringify(storedScreenshots));
-
-  //             // Update the state with the new Blob
-  //             setScreenshots((prevScreenshots) => [...prevScreenshots, blob]);
-  //           }
-  //         },
-  //         "image/jpeg",
-  //         0.7
-  //       );
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error capturing screenshot:", error);
-  //     });
-  // };
-
-  function handleMarkForReview() {
-    setdata((prevArr) => {
-      const newArr = [...prevArr]; // Create a shallow copy of the array
-      newArr[index] = {
-        ...newArr[index],
-        markForReview: true,
-        submittedAnswer: Selected,
-      }; // Update the specific object
-      localStorage.setItem(
-        "data" + localStorage.getItem("assessmenttoken"),
-        JSON.stringify(newArr)
-      );
-      return newArr; // Set the updated array
-    });
-    setSelected("");
-    if (index + 1 == Length) {
-      setindex(0);
-      return;
-    }
-    setindex((prev) => prev + 1);
-  }
   function handleReload() {
     // setenablefullscreen(true)
     enterFullScreen();
     Fetchdata();
+  }
+
+  const languageWiseApi = {
+    javascript: "runBaseTestforJS",
+    cpp: "runBaseTestforCpp",
+    java: "runBaseTestforJava",
+    python: "runBaseTestforPython",
+  };
+  const selectedlanguages = {
+    javascript: "JavaScript",
+    cpp: "C++",
+    java: "Java",
+    python: "Python",
+  };
+  const languageWisePayload = {
+    javascript: "jsCode",
+    cpp: "cppCode",
+    java: "javaCode",
+    python: "pythonCode",
+  };
+  let temp = true;
+
+  async function Runsampletestcases() {
+    try {
+      console.log("during run", compiledcode);
+      setshow(true);
+
+      let token = localStorage.getItem("USER");
+
+      const response = await fetch(BASE_URL + "/runProblemTestCases", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          problemId: allquestions[currentindex]?.problem?._id,
+          submitted_solution:
+            compiledcode ||
+            allquestions[currentindex]?.problem?.initial_user_func[language]
+              ?.initial_code,
+          selected_language: selectedlanguages[language],
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result?.success) {
+        setshow(false);
+        setoutput(result?.results);
+      }
+    } catch (error) {
+      console.error("Error running test cases:", error);
+    }
+  }
+
+  async function Submit() {
+    try {
+      // console.log("during run",compiledcode);
+      setshow(true);
+      let token = localStorage.getItem("USER");
+      const tempdata = await fetch(BASE_URL + "/submitProblemSolution", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          problemId: allquestions[currentindex]?.problem?._id,
+          submitted_solution:
+            compiledcode ||
+            allquestions[currentindex]?.problem?.initial_user_func[language]
+              ?.initial_code,
+          selected_language: selectedlanguages[language],
+        }),
+      });
+      const response = await tempdata.json();
+      // console.log(response);
+      if (response?.success) {
+        setshow(false);
+        setoutput(response?.result);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function Changequestion(ind) {
+    // setcompiledcode()
+    setallquestions((prevData) => {
+      const updatedData = [...prevData];
+      if (currentindex < updatedData.length) {
+        const updatedProblem = { ...updatedData[currentindex].problem };
+        const updatedUserFunc = { ...updatedProblem.initial_user_func };
+
+        if (updatedUserFunc[language]) {
+          updatedUserFunc[language] = {
+            ...updatedUserFunc[language],
+            initial_code: compiledcode,
+          };
+        }
+
+        updatedProblem.initial_user_func = updatedUserFunc;
+        updatedData[currentindex] = {
+          ...updatedData[currentindex],
+          problem: updatedProblem,
+        };
+      }
+
+      return updatedData;
+    });
+
+    // setcompiledcode(allquestions[ind]?.problem?.initial_user_func[language]?.initial_code)
+    setcurrentindex(ind);
+    // console.log("change",allquestions[ind]?.problem?.initial_user_func[language]?.initial_code);
+    setcompiledcode(
+      allquestions[ind]?.problem?.initial_user_func[language]?.initial_code
+    );
+    setoutput([]);
   }
 
   return (
@@ -1169,7 +1139,7 @@ export default function NewQuestion() {
                 microphone.{" "}
               </div>
             ) : (
-              <div className="px-[2%] space-y-5 py-2 bg-white" ref={contentRef}>
+              <div className="px-[1%] space-y-5 py-2 bg-white" ref={contentRef}>
                 <div className="fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0">
                   <div className="relative">
                     <video
@@ -1190,41 +1160,6 @@ export default function NewQuestion() {
                   </div>
                 </div>
 
-                {enablefullscreen ? (
-                  <>
-                    <div
-                      className="fixed -top-5 left-3 flex items-center justify-center gap-1 cursor-pointer w-fit"
-                      onClick={() => handleReload()}
-                    >
-                      <SlRefresh />
-                      <p className="text-sm italic">Reload page if needed</p>
-                    </div>
-                    <div className="fixed bottom-2 left-[250px] flex items-center gap-5 xsm:hidden">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-red-500 h-4 w-4"></div>
-                        <p>Skipped</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-[#1DBF73] h-4 w-4"></div>
-                        <p>Attempted</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-yellow-400 h-4 w-4"></div>
-                        <p>Active Question</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-slate-300 h-4 w-4"></div>
-                        <p>Unattempted</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-blue-600 h-4 w-4"></div>
-                        <p>Mark For Review</p>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  ""
-                )}
                 {!enablefullscreen ? (
                   <div className="flex justify-center items-center w-full h-full">
                     <button
@@ -1236,175 +1171,245 @@ export default function NewQuestion() {
                   </div>
                 ) : (
                   <>
-                    <div
-                      className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-5"
-                      onContextMenu={(e) => e.preventDefault()}
-                    >
-                      <div className="font-bold text-xl flex justify-center gap-3 items-center w-fit ">
-                        <p className="bg-white p-2 rounded-lg shadow-md">
-                          Time Remaining: {formatTime(timer)}
-                        </p>
-                      </div>
-                      <div className="font-semibold text-lg text-left">
-                        {assessmentname}
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <FaLessThan
-                          className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${
-                            index === 0
-                              ? "cursor-not-allowed opacity-50"
-                              : "cursor-pointer"
-                          }`}
-                          onClick={() => (index > 0 ? Previousquestion() : "")}
-                        />
-                        <FaGreaterThan
-                          className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${
-                            index + 1 === Length
-                              ? "cursor-not-allowed opacity-50"
-                              : "cursor-pointer"
-                          }`}
-                          onClick={() =>
-                            index + 1 < Length ? Nextquestion() : ""
-                          }
-                        />
-                      </div>
-                    </div>
+                    <div className="flex w-full justify-between h-[92vh] overflow-y-auto xsm:overflow-y-auto xsm:flex-col xsm:gap-5 font-pop xsm:h-auto">
+                      <>
+                        <div className="w-full ">
+                          {/* <h2 className="bg-[#0F2027] p-10 text-white taext mt-5 font-medium  rounded-2xl font-popping  sm:text-xl md:text-xl lg:text-xl xl:text-[23px]">
+          Test Your Knowledge On Full Stack Development
+        </h2> */}
+                          <div className="grid sm:grid-cols-12 gap-4  bg-white w-full">
+                            {/* Left Section: 3 Columns */}
 
-                    <div className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop xsm:h-auto">
-                      {index + 1 <= Length ? (
-                        <>
-                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:h-full">
-                            <div className="border-b-[2px] p-3 font-semibold">
-                              {data[index]?.module}
-                            </div>
-                            <div className="p-3 text-lg text-gray-700">
-                              Q:{index + 1}
-                              {") "} {data[index]?.question}
-                            </div>
-                          </div>
-                          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit scrollbarnumber">
-                            <div className="border-b-[2px] p-3 font-semibold">
-                              Options
-                            </div>
-                            <div className="flex flex-col p-5 gap-y-5 ">
-                              {data[index]?.options &&
-                                Object.entries(data[index]?.options).map(
-                                  ([key, value]) => (
-                                    <label
-                                      key={key}
-                                      onClick={() =>
-                                        setSelected(key.toString())
+                            <div className="col-span-12 lg:col-span-4 bg-white p-4 w-full ">
+                              <div className="fixed top-0 flex items-center justify-center gap-5 cursor-pointer w-fit">
+                                <div
+                                  className="flex items-center"
+                                  onClick={() => handleReload()}
+                                >
+                                  <SlRefresh />
+                                  <p className="text-sm italic">
+                                    Reload page if needed
+                                  </p>
+                                </div>
+                                <p className="bg-white p-2 rounded-lg shadow-md font-bold">
+                                  Time Remaining: {formatTime(timer)}
+                                </p>
+                              </div>
+                              <h1 className="font-semibold  py-2  font-montserrat text-[18px]">
+                                Problem Statement
+                              </h1>
+
+                              <div className="flex w-full">
+                                <p className="text-md font-bold pr-2">
+                                  {currentindex + 1}.
+                                </p>
+                                <div>
+                                  <ol>
+                                    <li>
+                                      {
+                                        allquestions[currentindex]?.problem
+                                          ?.problem_detail
                                       }
-                                      htmlFor={key.toString()}
-                                      className={`${
-                                        Selected === key.toString()
-                                          ? "border-[#1DBF73]"
-                                          : ""
-                                      } flex p-3 border rounded-lg space-x-2 cursor-pointer`}
-                                    >
-                                      <input
-                                        name="option"
-                                        id={key.toString()}
-                                        type="radio"
-                                        checked={Selected === key.toString()}
-                                        className="accent-[#1DBF73]"
-                                        readOnly
-                                      />
-                                      <p>{value}</p>
-                                    </label>
-                                  )
-                                )}
-                              <div className="flex justify-end space-x-2">
-                                <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${
-                                    index === 0
-                                      ? "cursor-not-allowed opacity-50"
-                                      : "cursor-pointer"
-                                  }`}
-                                  onClick={() =>
-                                    index > 0 ? Previousquestion() : ""
-                                  }
-                                >
-                                  Previous
-                                </button>
-                                <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${
-                                    index + 1 === Length
-                                      ? "cursor-not-allowed opacity-50"
-                                      : "cursor-pointer"
-                                  }`}
-                                  onClick={() =>
-                                    index + 1 < Length ? Nextquestion() : ""
-                                  }
-                                >
-                                  Next
-                                </button>
-                              </div>
-                              <div className="flex justify-end space-x-2">
-                                <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-[rgb(29,191,115)] text-white ${
-                                    !Selected
-                                      ? "cursor-not-allowed opacity-50"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    Selected ? handleMarkForReview() : ""
-                                  }
-                                >
-                                  Mark for review
-                                </button>
-                                <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${
-                                    !Selected
-                                      ? "cursor-not-allowed opacity-50"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    Selected ? handleSubmit() : ""
-                                  }
-                                >
-                                  {index + 1 == Length ? "Save" : "Save & Next"}
-                                </button>
+                                    </li>
+                                    {/* <li>Print the decimal value of each fraction.</li> */}
+                                  </ol>
+                                  {allquestions[
+                                    currentindex
+                                  ]?.problem?.sample_test_cases?.map(
+                                    (item, index) => {
+                                      return (
+                                        <>
+                                          <h2 className="font-semibold mt-3">
+                                            Example: {index + 1}
+                                          </h2>
+                                          <ol>
+                                            <li>Input: {item?.input}</li>
+                                            <li>
+                                              Output: {item?.expected_output}
+                                            </li>
+                                            {/* <li>
+                    Explanation: The sum of elements from the 2nd position to
+                    the 4th position is 12.
+                  </li> */}
+                                          </ol>
+                                        </>
+                                      );
+                                    }
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="w-[15%] flex flex-col justify-between xsm:w-full">
-                            <div className="w-full flex flex-row flex-wrap h-fit max-h-[90%] overflow-y-auto gap-3 scrollbarnumber ">
-                              {data?.map((item, ind) => {
-                                return (
-                                  <>
-                                    <div
-                                      onClick={() => handleQuestionNumber(ind)}
-                                      className={`text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
-                      ${
-                        index == ind
-                          ? "bg-yellow-400 border border-white"
-                          : !item?.isSubmitted && item?.markForReview
-                          ? "bg-blue-600"
-                          : !item?.isSubmitted && !item.isVisited
-                          ? "bg-gray-300"
-                          : item?.isSubmitted
-                          ? "bg-[#1DBF73]"
-                          : "bg-red-500"
-                      }`}
-                                    >
-                                      {ind + 1}
+
+                            {/* Right Section: 9 Columns */}
+                            <div className="col-span-12 lg:col-span-8">
+                              <div className="border border-black  rounded-xl">
+                                <div className="flex flex-row basis-1/2grid  pb-0">
+                                  <CodeEditor
+                                    show={show}
+                                    setshow={setshow}
+                                    language={language}
+                                    setlanguage={setlanguage}
+                                    Runsampletestcases={Runsampletestcases}
+                                    setcompiledcode={setcompiledcode}
+                                    codesnippet={
+                                      allquestions[currentindex]?.problem
+                                        ?.initial_user_func[language]
+                                        ?.initial_code
+                                    }
+                                    Submit={Submit}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="grid lg:grid-cols-2 md:grid-cols-2 gap-4 my-6 bg-white">
+                                <div className="border border-black pt-2 rounded-xl">
+                                  <h3 className="text-md font-popping font-semibold p-2">
+                                    Test Cases
+                                  </h3>
+
+                                  <div>
+                                    <div className="  align-iteam pb-0 block w-full h-[150px] text-sm text-white bg-black  border border-gray-300 focus:ring-blue-500 focus:border-blue-500 border-none outline-none  rounded-b-lg">
+                                      {allquestions[
+                                        currentindex
+                                      ]?.problem?.sample_test_cases?.map(
+                                        (item, index) => {
+                                          return (
+                                            <>
+                                              <button
+                                                onClick={() =>
+                                                  settestcaseindex(index)
+                                                }
+                                                className={` ml-4 mt-2 hover:bg-sky-100 hover:text-black p-2 rounded ${
+                                                  testcaseindex == index
+                                                    ? "bg-green-500 text-white"
+                                                    : ""
+                                                }`}
+                                              >
+                                                Case {index + 1}
+                                              </button>
+                                            </>
+                                          );
+                                        }
+                                      )}
+
+                                      <p className="mt-3 ml-3">
+                                        {" "}
+                                        Input:{" "}
+                                        {
+                                          allquestions[currentindex]?.problem
+                                            ?.sample_test_cases[testcaseindex]
+                                            ?.input
+                                        }
+                                      </p>
+                                      <p className=" mt-4 ml-3">
+                                        Output:{" "}
+                                        {
+                                          allquestions[currentindex]?.problem
+                                            ?.sample_test_cases[testcaseindex]
+                                            ?.expected_output
+                                        }
+                                      </p>
                                     </div>
-                                  </>
-                                );
-                              })}
-                            </div>
-                            <div
-                              className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg cursor-pointer xsm:mt-5"
-                              onClick={() => handleClick(false, "")}
-                            >
-                              Submit
+                                    {/* <textarea
+                                    id="message"
+                                    rows="4"
+                                    class="block w-full h-[192px] text-sm text-white bg-black border-none outline-none resize-none rounded-b-lg"
+                                    placeholder="Write your thoughts here..."
+                                  ></textarea> */}
+                                  </div>
+                                </div>
+
+                                <div className="border border-black pt-2 rounded-xl  ">
+                                  <h3 className="text-md font-popping font-semibold p-2">
+                                    Output
+                                  </h3>
+                                  {/* <textarea
+                                    id="message"
+                                    rows="4"
+                                    className="block w-full h-[216px] text-sm text-white bg-black  border border-gray-300 focus:ring-blue-500 focus:border-blue-500 border-none outline-none  rounded-b-lg"
+                                    placeholder="Write your thoughts here..."
+                                  ></textarea> */}
+                                  <div className="block w-full h-[150px] text-sm text-white bg-black  border border-gray-300 focus:ring-blue-500 focus:border-blue-500 border-none outline-none  rounded-b-lg overflow-y-auto p-3">
+                                    {output?.map((item, index) => {
+                                      return (
+                                        <>
+                                          <div className="mt-3 flex gap-2 items-center">
+                                            <p>TestCase {index + 1}</p>
+                                            {item?.success ? (
+                                              <MdDone className="text-white text-lg  " />
+                                            ) : (
+                                              <ImCross className="text-white   " />
+                                            )}
+                                          </div>
+                                          <div>
+                                            Expected output :{" "}
+                                            {item?.expectedOutput}
+                                          </div>
+                                          <div>
+                                            Actual output : {item?.actualOutput}
+                                          </div>
+                                        </>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="w-full flex justify-end ">
+                                <button
+                                  onClick={() => handleClick(false, "")}
+                                  className="bg-green-600 rounded p-2 text-white"
+                                >
+                                  Submit Assessment
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </>
-                      ) : (
-                        ""
-                      )}
+
+                          <div className="flex justify-center gap-1 text-xs font-medium mb-10">
+                            {allquestions?.length > 0 ? (
+                              <div className="flex justify-center gap-1 text-xs font-medium mb-10">
+                                {allquestions?.map((item, index) => (
+                                  <div key={index}>
+                                    <p
+                                      onClick={() => Changequestion(index)}
+                                      className={`cursor-pointer block size-8 rounded border border-gray-100 text-center leading-8 text-gray-900 ${
+                                        currentindex == index
+                                          ? "bg-green-500 text-black"
+                                          : ""
+                                      }`}
+                                    >
+                                      {index + 1}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-center text-red-500">
+                                No questions available
+                              </p>
+                            )}
+
+                            {/* {allquestions?.map((item, index) => {
+                              return (
+                                <>
+                                  <div>
+                                    <p
+                                      onClick={() => Changequestion(index)}
+                                      className={`cursor-pointer block size-8 rounded border border-gray-100  text-center leading-8 text-gray-900 ${
+                                        currentindex == index
+                                          ? "bg-green-500 text-black"
+                                          : ""
+                                      }`}
+                                    >
+                                      {index + 1}
+                                    </p>
+                                  </div>
+                                </>
+                              );
+                            })} */}
+                          </div>
+                        </div>
+                      </>
                     </div>
                   </>
                 )}
