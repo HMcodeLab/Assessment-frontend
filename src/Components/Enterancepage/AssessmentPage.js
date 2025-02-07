@@ -15,12 +15,12 @@ const Instructions = ({handleSubmit}) => {
 
     return (
         <div className="w-full h-full flex flex-col justify-between">
-            <h1 className="text-2xl font-bold mb-4">Instructions Before Doing The Test</h1>
+            <h1 className="text-2xl font-bold mb-4">Instructions Before Attepmting The Test</h1>
             <div className="overflow-y-auto flex-grow">
 
 
                 <div className="mb-4 pr-4">
-                    <h2 className="text-xl font-semibold mb-2">Online Test Instructions for AI-Proctored PAP Test</h2>
+                    <h2 className="text-xl font-semibold mb-2">Online Test Instructions for AI-Proctored Test</h2>
 
                     <h3 className="text-lg font-semibold mt-4 mb-2">Getting Ready:</h3>
                     <ul className="list-disc pl-5 mb-4">
@@ -28,12 +28,12 @@ const Instructions = ({handleSubmit}) => {
                         <li>Find a quiet, well-lit room with a clean desk/table to take the test.</li>
                         <li>Close all other programs and browsers before starting the test.</li>
                     </ul>
-
+{/* 
                     <h3 className="text-lg font-semibold mt-4 mb-2">Launching the Test:</h3>
                     <ol className="list-decimal pl-5 mb-4">
                         <li>Log into the test portal using the provided credentials.</li>
                         <li>Follow the instructions to launch the AI proctoring software</li>
-                    </ol>
+                    </ol> */}
 
                     <h3 className="text-lg font-semibold mt-4 mb-2">During the Test:</h3>
                     <ol className="list-decimal pl-5 mb-4">
@@ -44,7 +44,7 @@ const Instructions = ({handleSubmit}) => {
 
                     <h3 className="text-lg font-semibold mt-4 mb-2">Alerts:</h3>
                     <ul className="list-disc pl-5 mb-4">
-                        <li><strong>3 Times Alert:</strong> If you leave the testing area or look away from the screen for an extended period, you will receive an alert.</li>
+                        <li><strong>Engagement</strong> Elsewhere Alert</li>
                         <li><strong>2 Person Alert:</strong> If the AI detects a second person in the testing area, you will receive an alert.</li>
                         <li><strong>Tab Change Alert:</strong> If you switch tabs or windows during the test, you will receive an alert.</li>
                         <li><strong>New Window Alert:</strong> If you open a new window during the test, you will receive an alert.</li>
@@ -324,11 +324,11 @@ const [show, setshow] = useState(false)
     let hours = dateObj.getHours();
     const minutes = String(dateObj.getMinutes()).padStart(2, "0");
 
-    const ampm = hours >= 12 ? "pm" : "am";
+    const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
 
-    const time = `${hours}.${minutes}${ampm}`;
+    const time = `${hours}:${minutes} ${ampm}`;
 
     return `${day} ${month} ${year} ${time}`;
 }
@@ -427,9 +427,9 @@ const [show, setshow] = useState(false)
               </div>
               <div className="flex items-center">
                 <MdPhone className="text-[rgba(60,60,60,1)] mr-2" size={20} />{" "}
-                {/* Phone icon */}
+                
                 <p className="font-poppins text-[rgba(60,60,60,1)]">
-                  76578-22600, 7717667030
+                  7657822600, 7717667030
                 </p>
               </div>
             </div>

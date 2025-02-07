@@ -11,6 +11,8 @@ import Spinner from "../Spinner";
 import Watermark from "../temp";
 import { SlRefresh } from "react-icons/sl";
 import html2canvas from "html2canvas";
+import { IoIosTime } from "react-icons/io";
+import { IoDocumentTextSharp } from "react-icons/io5";
 const base64ToBlob = (base64, contentType = "image/jpeg") => {
   const byteCharacters = atob(base64.split(",")[1]);
   const byteNumbers = new Array(byteCharacters.length);
@@ -71,6 +73,9 @@ export default function NewQuestion() {
   const [micblocked, setmicblocked] = useState();
   const [showalert, setshowalert] = useState(true);
   const [assessmentname, setassessmentname] = useState();
+  const [maxMarks, setmaxMarks] = useState();
+  const [timelimit, settimelimit] = useState();
+  const [module, setmodule] = useState();
   const [ProctoringScore, setProctoringScore] = useState({
     mic: 0,
     webcam: 0,
@@ -89,6 +94,7 @@ export default function NewQuestion() {
     ControlKeyPressed: false,
     invisiblecam: false,
   });
+  console.log(module);
   const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -145,6 +151,9 @@ export default function NewQuestion() {
       if (response.success) {
         setshow(false);
         setassessmentname(response?.Assessment?.assessmentName);
+        setmaxMarks(response?.Assessment?.maxMarks);
+        settimelimit(response?.Assessment?.timelimit);
+        setmodule(response?.Assessment?.Assessmentmodules);
 
         // Store haveCodingAssessment state
         setHaveCodingAssessment(
@@ -1369,24 +1378,40 @@ export default function NewQuestion() {
                             </div>
                           </div>
                           <div className="w-[15%] flex flex-col justify-between xsm:w-full">
+                            <div>
+                              <strong>{assessmentname}</strong>
+                              <div className="flex xsm:flex md:flex-col items-center justify-between">
+                                <span className=" flex items-center gap-1 text-xs">
+                                  <IoDocumentTextSharp />
+                                  {maxMarks} Marks
+                                </span>
+                                <span className="flex items-center gap-1 text-xs ">
+                                  <IoIosTime />
+                                  {timelimit} mins
+                                </span>
+                              </div>
+                            </div>
                             <div className="w-full flex flex-row flex-wrap h-fit max-h-[90%] overflow-y-auto gap-3 scrollbarnumber ">
                               {data?.map((item, ind) => {
                                 return (
                                   <>
+                                    {/* <div>
+                                    {item.maxMarks}
+                                  </div> */}
                                     <div
                                       onClick={() => handleQuestionNumber(ind)}
                                       className={`text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
-                      ${
-                        index == ind
-                          ? "bg-yellow-400 border border-white"
-                          : !item?.isSubmitted && item?.markForReview
-                          ? "bg-blue-600"
-                          : !item?.isSubmitted && !item.isVisited
-                          ? "bg-gray-300"
-                          : item?.isSubmitted
-                          ? "bg-[#1DBF73]"
-                          : "bg-red-500"
-                      }`}
+                                     ${
+                                       index == ind
+                                         ? "bg-yellow-400 border border-white"
+                                         : !item?.isSubmitted && item?.markForReview
+                                         ? "bg-blue-600"
+                                         : !item?.isSubmitted && !item.isVisited
+                                         ? "bg-gray-300"
+                                         : item?.isSubmitted
+                                         ? "bg-[#1DBF73]"
+                                         : "bg-red-500"
+                                     }`}
                                     >
                                       {ind + 1}
                                     </div>
