@@ -80,6 +80,7 @@ export default function CodingAssessment() {
   const [compiledcode, setcompiledcode] = useState("");
   const [language, setlanguage] = useState("javascript");
   const [showSpinner, setshowSpinner] = useState(false);
+  const [timelimit, settimelimit] = useState();
   const [ProctoringScore, setProctoringScore] = useState({
     mic: 0,
     webcam: 0,
@@ -153,6 +154,7 @@ export default function CodingAssessment() {
       if (response.success) {
         setshow(false);
         setassessmentname(response?.Assessment?.assessmentName);
+        settimelimit(response?.Assessment?.timelimit);
 
         const newProctoringActive = {};
         Object.keys(response?.Assessment?.ProctoringFor).forEach((key) => {
@@ -486,16 +488,25 @@ export default function CodingAssessment() {
   //   }
   // }
 
+  async function getFinalTime() {
+    const initialTime = timelimit*60;
+    const totalTimeTaken = initialTime - timer; 
+    return totalTimeTaken; 
+  }
+
   async function handleClick(status, remarks) {
     // console.log(screenshots);
     setshow(true);
+    const finalTime = await getFinalTime();
     let formdata = new FormData();
     formdata.append("isSuspended", status);
     formdata.append("ProctoringScore", JSON.stringify(ProctoringScore));
     formdata.append("remarks", remarks);
-    formdata.append("submissionTime", timer / 60);
+    formdata.append("submissionTime", finalTime);
     // formdata.append('lastindex',index)
-
+    // console.log("formdata ",);
+    
+    // return;
     // console.log(filteredQuestions);
 
     const filesArray = [];
@@ -511,18 +522,11 @@ export default function CodingAssessment() {
       // Create form data
       let formdata = new FormData();
       formdata.append("isCodingAssessmentSuspended", false);
-      formdata.append("remarks", "This is the remark for the assessment");
-      formdata.append("submissionTime", 345);
+      formdata.append("remarks", remarks);
+      formdata.append("submissionTime", finalTime);
       formdata.append(
         "ProctoringScore",
-        JSON.stringify({
-          mic: 85,
-          webcam: 90,
-          TabSwitch: 5,
-          multiplePersonInFrame: 0,
-          PhoneinFrame: 0,
-          SoundCaptured: 10,
-        })
+        JSON.stringify(ProctoringScore)
       );
 
       const data = await fetch(url, {
@@ -533,7 +537,7 @@ export default function CodingAssessment() {
         },
         body: formdata,
       });
-
+      
       const response = await data.json();
       if (response.success) {
         setshow(false);
