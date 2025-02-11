@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { FaArrowLeft, FaGreaterThan, FaLessThan } from "react-icons/fa";
+import { useEffect, useState, useRef } from "react";
+import { FaGreaterThan, FaLessThan } from "react-icons/fa";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import { json, useNavigate, useSearchParams } from "react-router-dom";
@@ -94,7 +94,7 @@ export default function NewQuestion() {
     ControlKeyPressed: false,
     invisiblecam: false,
   });
-  console.log(module);
+  
   const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -183,18 +183,26 @@ export default function NewQuestion() {
     }
   }
 
-  // Run Fetchdata only once when the component mounts
+  
   useEffect(() => {
     Fetchdata();
   }, []);
+  async function getFinalTime() {
+    const initialTime = timelimit*60;
+    const totalTimeTaken = initialTime - timer; 
+    return totalTimeTaken; 
+  }
+
 
   async function handleClick(status, remarks) {
     setshow(true);
+    const finalTime = await getFinalTime();
     let formdata = new FormData();
     formdata.append("isSuspended", status);
     formdata.append("ProctoringScore", JSON.stringify(ProctoringScore));
     formdata.append("remarks", remarks);
     formdata.append("lastindex", index);
+    formdata.append("submissionTime", finalTime);
 
     const filteredQuestions = data
       .filter((question) => question.isSubmitted)
