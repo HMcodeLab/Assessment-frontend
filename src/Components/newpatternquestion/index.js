@@ -1140,7 +1140,7 @@ export default function NewQuestion() {
     <>
       <div
         onContextMenu={(e) => e.preventDefault()}
-        className="relative w-full h-screen xsm:h-full mx-auto "
+        className="relative w-full h-screen xsm:overflow-y-auto mx-auto "
       >
         {enablefullscreen ? <Watermark /> : ""}
         <div
@@ -1186,8 +1186,8 @@ export default function NewQuestion() {
                 microphone.{" "}
               </div>
             ) : (
-              <div className="px-[2%] space-y-5 py-2 bg-white" ref={contentRef}>
-                <div className="fixed bottom-0 left-0 font-pop xsm:top-10 xsm:left-0">
+              <div className="px-[2%] py-2 bg-white" ref={contentRef}>
+                <div className="fixed bottom-0 left-0 font-pop xsm:top-2 xsm:left-0">
                   <div className="relative">
                     <video
                       playsInline
@@ -1245,7 +1245,7 @@ export default function NewQuestion() {
                 {!enablefullscreen ? (
                   <div className="flex justify-center items-center w-full h-full">
                     <button
-                      className="bg-[#1DBF73] text-white rounded p-2"
+                      className="bg-[#1DBF73]  text-white rounded p-2"
                       onClick={enterFullScreen}
                     >
                       Enable full screen to continue test
@@ -1254,20 +1254,20 @@ export default function NewQuestion() {
                 ) : (
                   <>
                     <div
-                      className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-5"
+                      className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-2"
                       onContextMenu={(e) => e.preventDefault()}
                     >
-                      <div className="font-bold text-xl flex justify-center gap-3 items-center w-fit ">
-                        <p className="bg-white p-2 rounded-lg shadow-md">
+                      <div className="font-bold text-xl flex xsm:text-[12px] justify-center gap-3 items-center w-fit ">
+                        <p className="bg-white p-2 rounded-lg shadow-md xsm:mt-6 ">
                           Time Remaining: {formatTime(timer)}
                         </p>
                       </div>
-                      <div className="font-semibold text-lg text-left">
+                      <div className="font-semibold text-lg  text-left xsm:text-sm xsm:text-green-500">
                         {assessmentname}
                       </div>
-                      <div className="flex items-center space-x-3">
+                      <div className="flex xsm:hidden  items-center space-x-3">
                         <FaLessThan
-                          className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${
+                          className={`h-8 w-8 xsm:h-5 xsm:w-5 xsm:p-1 text-xs rounded-full  bg-slate-300 p-2 ${
                             index === 0
                               ? "cursor-not-allowed opacity-50"
                               : "cursor-pointer"
@@ -1275,7 +1275,7 @@ export default function NewQuestion() {
                           onClick={() => (index > 0 ? Previousquestion() : "")}
                         />
                         <FaGreaterThan
-                          className={`h-8 w-8 text-xs rounded-full bg-slate-300 p-2 ${
+                          className={`h-8 w-8 xsm:h-5 xsm:w-5 xsm:p-1 text-xs rounded-full bg-slate-300 p-2 ${
                             index + 1 === Length
                               ? "cursor-not-allowed opacity-50"
                               : "cursor-pointer"
@@ -1287,19 +1287,19 @@ export default function NewQuestion() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-5 font-pop xsm:h-auto">
+                    <div className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-1 font-pop xsm:overflow-y-auto">
                       {index + 1 <= Length ? (
                         <>
-                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:h-full">
-                            <div className="border-b-[2px] p-3 font-semibold">
+                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:min-h-fit xsm:max-h-[45%]">
+                            {/* <div className="border-b-[2px] p-3 font-semibold">
                               {data[index]?.module}
-                            </div>
-                            <div className="p-3 text-lg text-gray-700">
+                            </div> */}
+                            <div className="p-3 text-lg xsm:overflow-y-auto xsm:h-full xsm:text-justify xsm:text-sm text-gray-700">
                               Q:{index + 1}
                               {") "} {data[index]?.question}
                             </div>
                           </div>
-                          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[50vh] xsm:h-fit scrollbarnumber">
+                          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[52vh] xsm:h-fit scrollbarnumber">
                             <div className="border-b-[2px] p-3 font-semibold">
                               Options
                             </div>
@@ -1309,7 +1309,7 @@ export default function NewQuestion() {
                                   ([key, value]) => (
                                     <label
                                       key={key}
-                                      onClick={() =>
+                                      onChange={() =>
                                         setSelected(key.toString())
                                       }
                                       htmlFor={key.toString()}
@@ -1317,15 +1317,15 @@ export default function NewQuestion() {
                                         Selected === key.toString()
                                           ? "border-[#1DBF73]"
                                           : ""
-                                      } flex p-3 border rounded-lg space-x-2 cursor-pointer`}
+                                      } flex p-3 border xsm:text-xs rounded-lg space-x-2 cursor-pointer`}
                                     >
                                       <input
                                         name="option"
                                         id={key.toString()}
                                         type="radio"
                                         checked={Selected === key.toString()}
-                                        className="accent-[#1DBF73]"
-                                        readOnly
+                                        onChange={() => setSelected(key.toString())}
+                                        className="accent-[#1DBF73] xsm:z-50"
                                       />
                                       <p>{value}</p>
                                     </label>
@@ -1399,7 +1399,7 @@ export default function NewQuestion() {
                                 </span>
                               </div>
                             </div>
-                            <div className="w-full flex flex-row flex-wrap h-fit max-h-[90%] overflow-y-auto gap-3 scrollbarnumber ">
+                            <div className="w-full flex flex-row flex-wrap xsm:flex-nowrap xsm:gap-1 h-fit max-h-[90%] overflow-y-auto gap-3 xsm:z-50 scrollbarnumber ">
                               {data?.map((item, ind) => {
                                 return (
                                   <>
@@ -1408,11 +1408,12 @@ export default function NewQuestion() {
                                   </div> */}
                                     <div
                                       onClick={() => handleQuestionNumber(ind)}
-                                      className={`text-white  h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
+                                      className={`text-white xsm:h-full xsm:w-full xsm:p-3 h-10 w-10 flex justify-center items-center cursor-pointer shadow-lg rounded  
                                      ${
                                        index == ind
                                          ? "bg-yellow-400 border border-white"
-                                         : !item?.isSubmitted && item?.markForReview
+                                         : !item?.isSubmitted &&
+                                           item?.markForReview
                                          ? "bg-blue-600"
                                          : !item?.isSubmitted && !item.isVisited
                                          ? "bg-gray-300"
@@ -1428,7 +1429,7 @@ export default function NewQuestion() {
                               })}
                             </div>
                             <div
-                              className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg cursor-pointer xsm:mt-5"
+                              className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg cursor-pointer xsm:mt-9"
                               onClick={() => handleClick(false, "")}
                             >
                               Submit
