@@ -101,10 +101,10 @@ const AssessmentPage = ({ onContinue,data }) => {
         <div className="w-full h-full flex flex-col justify-between">
             <div>
                 <h1 className="text-3xl font-semibold  mb-4">Welcome</h1>
-                <h2 className="text-2xl font-bold text-[36px] mb-2">
+                <h2 className="text-2xl font-bold xsm:text-2xl text-[36px] mb-2">
                     It's Time To Complete Your
                 </h2>
-                <h3 className="mt-0 text-[40px] text-[rgba(29,191,115,1)] font-poppins">
+                <h3 className="mt-0 text-[40px] xsm:text-2xl text-[rgba(29,191,115,1)] font-poppins">
                     {data?.assessmentName}
                 </h3>
 

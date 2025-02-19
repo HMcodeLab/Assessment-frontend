@@ -1186,8 +1186,8 @@ export default function NewQuestion() {
                 microphone.{" "}
               </div>
             ) : (
-              <div className="px-[2%] py-2 bg-white" ref={contentRef}>
-                <div className="fixed bottom-0 left-0 font-pop xsm:top-2 xsm:left-0">
+              <div className="px-[2%] py-2  bg-white" ref={contentRef}>
+                <div className="fixed bottom-0 left-0 font-pop xsm:top-0 xsm:left-0">
                   <div className="relative">
                     <video
                       playsInline
@@ -1257,6 +1257,7 @@ export default function NewQuestion() {
                       className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-2"
                       onContextMenu={(e) => e.preventDefault()}
                     >
+                      <div className="xsm:ml-10 flex justify-between">
                       <div className="font-bold text-xl flex xsm:text-[12px] justify-center gap-3 items-center w-fit ">
                         <p className="bg-white p-2 rounded-lg shadow-md xsm:mt-6 ">
                           Time Remaining: {formatTime(timer)}
@@ -1284,6 +1285,7 @@ export default function NewQuestion() {
                             index + 1 < Length ? Nextquestion() : ""
                           }
                         />
+                      </div>
                       </div>
                     </div>
 
@@ -1333,7 +1335,7 @@ export default function NewQuestion() {
                                 )}
                               <div className="flex justify-end space-x-2">
                                 <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${
+                                  className={`shadow-lg py-2 px-4 xsm:text-xs rounded-xl bg-[#1DBF73] text-white ${
                                     index === 0
                                       ? "cursor-not-allowed opacity-50"
                                       : "cursor-pointer"
@@ -1345,7 +1347,7 @@ export default function NewQuestion() {
                                   Previous
                                 </button>
                                 <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-[#1DBF73] text-white ${
+                                  className={`shadow-lg py-2 px-4 xsm:text-xs rounded-xl bg-[#1DBF73] text-white ${
                                     index + 1 === Length
                                       ? "cursor-not-allowed opacity-50"
                                       : "cursor-pointer"
@@ -1359,7 +1361,7 @@ export default function NewQuestion() {
                               </div>
                               <div className="flex justify-end space-x-2">
                                 <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-[rgb(29,191,115)] text-white ${
+                                  className={`shadow-lg py-2 xsm:text-xs px-4 rounded-xl bg-[rgb(29,191,115)] text-white ${
                                     !Selected
                                       ? "cursor-not-allowed opacity-50"
                                       : ""
@@ -1371,7 +1373,7 @@ export default function NewQuestion() {
                                   Mark for review
                                 </button>
                                 <button
-                                  className={`shadow-lg py-2 px-4 rounded-xl bg-blue-500 text-white ${
+                                  className={`shadow-lg py-2 px-4 rounded-xl xsm:text-xs bg-blue-500 text-white ${
                                     !Selected
                                       ? "cursor-not-allowed opacity-50"
                                       : ""
@@ -1429,7 +1431,7 @@ export default function NewQuestion() {
                               })}
                             </div>
                             <div
-                              className="py-2 px-4 rounded-xl bg-[#1DBF73] text-white  text-center shadow-lg cursor-pointer xsm:mt-9"
+                              className="py-2 px-4 rounded-xl xsm:text-xs bg-[#1DBF73] text-white  text-center shadow-lg cursor-pointer xsm:mt-9"
                               onClick={() => handleClick(false, "")}
                             >
                               Submit
