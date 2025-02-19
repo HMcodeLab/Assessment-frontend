@@ -1254,7 +1254,7 @@ export default function NewQuestion() {
                 ) : (
                   <>
                     <div
-                      className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-2"
+                      className="flex justify-between items-center border xsm:overflow-y-auto p-3 rounded-lg font-pop xsm:h-[10vh] xsm:flex-col xsm:gap-2"
                       onContextMenu={(e) => e.preventDefault()}
                     >
                       
@@ -1289,10 +1289,10 @@ export default function NewQuestion() {
                       </div>
                    
 
-                    <div className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-1 font-pop xsm:overflow-y-auto">
+                    <div className="flex justify-between h-[77vh] xsm:h-full xsm:flex-col xsm:gap-1 font-pop xsm:overflow-y-auto">
                       {index + 1 <= Length ? (
                         <>
-                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:min-h-fit ">
+                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:max-h-full ">
                             {/* <div className="border-b-[2px] p-3 font-semibold">
                               {data[index]?.module}
                             </div> */}
@@ -1301,7 +1301,7 @@ export default function NewQuestion() {
                               {") "} {data[index]?.question}
                             </div>
                           </div>
-                          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:min-h-[52vh] xsm:h-fit scrollbarnumber">
+                          <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:h-[50vh] scrollbarnumber">
                             <div className="border-b-[2px] p-3 font-semibold">
                               Options
                             </div>
