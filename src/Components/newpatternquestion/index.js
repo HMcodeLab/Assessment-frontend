@@ -1257,7 +1257,7 @@ export default function NewQuestion() {
                       className="flex justify-between items-center border p-3 rounded-lg font-pop xsm:flex-col xsm:gap-2"
                       onContextMenu={(e) => e.preventDefault()}
                     >
-                      <div className="xsm:ml-10 flex justify-between">
+                      
                       <div className="font-bold text-xl flex xsm:text-[12px] justify-center gap-3 items-center w-fit ">
                         <p className="bg-white p-2 rounded-lg shadow-md xsm:mt-6 ">
                           Time Remaining: {formatTime(timer)}
@@ -1287,12 +1287,12 @@ export default function NewQuestion() {
                         />
                       </div>
                       </div>
-                    </div>
+                   
 
                     <div className="flex justify-between h-[77vh] xsm:flex-col xsm:gap-1 font-pop xsm:overflow-y-auto">
                       {index + 1 <= Length ? (
                         <>
-                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:min-h-fit xsm:max-h-[45%]">
+                          <div className="w-[45%] rounded-xl border max-h-[70%] shadow-xl xsm:w-full overflow-y-auto scrollbarnumber xsm:min-h-fit ">
                             {/* <div className="border-b-[2px] p-3 font-semibold">
                               {data[index]?.module}
                             </div> */}
