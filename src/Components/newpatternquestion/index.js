@@ -1346,7 +1346,7 @@ export default function NewQuestion() {
                                 >
                                   Previous
                                 </button>
-                                <button
+                                {/* <button
                                   className={`shadow-lg py-2 px-4 xsm:text-xs rounded-xl bg-[#1DBF73] text-white ${
                                     index + 1 === Length
                                       ? "cursor-not-allowed opacity-50"
@@ -1357,7 +1357,7 @@ export default function NewQuestion() {
                                   }
                                 >
                                   Next
-                                </button>
+                                </button> */}
                               </div>
                               <div className="flex justify-end space-x-2">
                                 <button

@@ -120,14 +120,14 @@ const AssessmentPage = ({ onContinue,data }) => {
                         />
                     </div>
 
-                    <div>
+                    {/* <div>
                         <label className="block font-Poppins">Phone Number</label>
                         <input
                             readOnly
                             value={data?.userAccess?.phone_number}
                             className="w-full border-b border-gray-300 rounded-none p-0 focus:outline-none focus:border-b-[rgba(29,191,115,1)]"
                         />
-                    </div>
+                    </div> */}
 
                     {/* <div>
                         <label className="block font-Poppins">College Name</label>
