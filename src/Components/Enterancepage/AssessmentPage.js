@@ -44,7 +44,7 @@ const Instructions = ({handleSubmit}) => {
 
                     <h3 className="text-lg font-semibold mt-4 mb-2">Alerts:</h3>
                     <ul className="list-disc pl-5 mb-4">
-                        <li><strong>Engagement</strong> Elsewhere Alert</li>
+                        {/* <li><strong>Engagement</strong> Elsewhere Alert</li> */}
                         <li><strong>2 Person Alert:</strong> If the AI detects a second person in the testing area, you will receive an alert.</li>
                         <li><strong>Tab Change Alert:</strong> If you switch tabs or windows during the test, you will receive an alert.</li>
                         <li><strong>New Window Alert:</strong> If you open a new window during the test, you will receive an alert.</li>
