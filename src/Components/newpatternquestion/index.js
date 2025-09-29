@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { FaGreaterThan, FaLessThan } from "react-icons/fa";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
@@ -34,6 +34,9 @@ export default function NewQuestion() {
   const [params, setparams] = useSearchParams();
   const screenshotRef = useRef();
   const [personDetectionDisabled, setPersonDetectionDisabled] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [translatedQuestions, setTranslatedQuestions] = useState({});
+
   const [screenshots, setScreenshots] = useState(() => {
     const key = `screenshots${localStorage.getItem("assessmenttoken")}`;
     const storedScreenshots = localStorage.getItem(key);
@@ -94,7 +97,7 @@ export default function NewQuestion() {
     ControlKeyPressed: false,
     invisiblecam: false,
   });
-  
+
   const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -183,16 +186,14 @@ export default function NewQuestion() {
     }
   }
 
-  
   useEffect(() => {
     Fetchdata();
   }, []);
   async function getFinalTime() {
-    const initialTime = timelimit*60;
-    const totalTimeTaken = initialTime - timer; 
-    return totalTimeTaken; 
+    const initialTime = timelimit * 60;
+    const totalTimeTaken = initialTime - timer;
+    return totalTimeTaken;
   }
-
 
   async function handleClick(status, remarks) {
     setshow(true);
@@ -301,6 +302,85 @@ export default function NewQuestion() {
   //   }
   // }
 
+  const translationCache = useRef({});
+
+  const translateCurrentQuestion = useCallback(async () => {
+    if (!data[index]) return;
+
+    const cacheKey = `${index}_${selectedLanguage}`;
+
+    // Check cache first to avoid duplicate API calls
+    if (translationCache.current[cacheKey]) {
+      setTranslatedQuestions((prev) => ({
+        ...prev,
+        ...translationCache.current[cacheKey],
+      }));
+      return;
+    }
+
+    const newTranslations = {};
+
+    try {
+      // Translate question
+      if (data[index]?.question) {
+        const translatedQ = await translateText(
+          data[index].question,
+          selectedLanguage
+        );
+        newTranslations[`q${index}`] = translatedQ;
+      }
+
+      // Translate options - use Promise.all for parallel requests
+      if (data[index]?.options) {
+        const translationPromises = Object.entries(data[index].options).map(
+          async ([key, value]) => {
+            const translatedOpt = await translateText(value, selectedLanguage);
+            newTranslations[`${index}_${key}`] = translatedOpt;
+          }
+        );
+
+        await Promise.all(translationPromises);
+      }
+
+      // Update cache
+      translationCache.current[cacheKey] = newTranslations;
+
+      // Update state
+      setTranslatedQuestions((prev) => ({
+        ...prev,
+        ...newTranslations,
+      }));
+    } catch (error) {
+      console.error("Translation failed:", error);
+      // Fallback to original text on error
+    }
+  }, [data, index, selectedLanguage]); // ✅ translatedQuestions removed from dependencies
+
+  useEffect(() => {
+    if (selectedLanguage !== "English" && data.length > 0 && data[index]) {
+      translateCurrentQuestion();
+    } else if (selectedLanguage === "English") {
+      // Clear translations when switching back to English
+      setTranslatedQuestions({});
+    }
+  }, [selectedLanguage, data, index, translateCurrentQuestion]); // ✅ All dependencies properly declared
+
+  // Temporary debug statements add karein
+  useEffect(() => {
+    console.log("Current Language:", selectedLanguage);
+    console.log("Current Question:", data[index]?.question);
+    console.log("Translated Questions:", translatedQuestions);
+
+    if (data.length > 0 && data[index]) {
+      translateCurrentQuestion();
+    }
+  }, [selectedLanguage, index, data, translateCurrentQuestion]);
+  // ✅ Now useEffect has all required dependencies
+  useEffect(() => {
+    if (selectedLanguage !== "English" && data.length > 0) {
+      translateCurrentQuestion();
+    }
+  }, [selectedLanguage, data, index, translateCurrentQuestion]); // ✅ translateCurrentQuestion included
   useEffect(() => {
     if (enablefullscreen) {
       Fetchdata();
@@ -1136,6 +1216,76 @@ export default function NewQuestion() {
     Fetchdata();
   }
 
+  // Translation service integrate karein
+
+  // Translation function - optimize karein
+  // Translation function - properly define karein
+const languageMap = {
+  English: "en",
+  Hindi: "hi",
+  Punjabi: "pa",
+  Bengali: "bn",
+  Gujarati: "gu",
+  Tamil: "ta",
+  Telugu: "te",
+  Kannada: "kn",
+  Malayalam: "ml",
+  Urdu: "ur",
+  Nepali: "ne",
+  // foreign bhi daal sakte ho
+  French: "fr",
+  German: "de",
+  Spanish: "es",
+  Russian: "ru",
+  Chinese: "zh-CN",
+  Japanese: "ja",
+  Korean: "ko",
+  Arabic: "ar",
+};
+
+const translateText = async (text, targetLang) => {
+  try {
+    if (!text || targetLang === "English") return text;
+
+    const langCode = languageMap[targetLang] || "en"; // mapping se lang code lo
+
+    const response = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${langCode}&dt=t&q=${encodeURIComponent(
+        text
+      )}`
+    );
+
+    const data = await response.json();
+
+    return data[0][0][0] || text;
+  } catch (error) {
+    console.error("Translation error:", error);
+    return text;
+  }
+};
+
+
+  // Sirf ek useEffect use karein translation ke liye
+  useEffect(() => {
+    if (data.length > 0 && data[index]) {
+      translateCurrentQuestion();
+    }
+  }, [selectedLanguage, index, data, translateCurrentQuestion]);
+
+  // Language change par translation trigger karein
+  useEffect(() => {
+    if (data.length > 0 && data[index]) {
+      translateCurrentQuestion();
+    }
+  }, [selectedLanguage, index, data, translateCurrentQuestion]);
+
+  // Data load hone par bhi translation check karein
+  useEffect(() => {
+    if (data.length > 0 && selectedLanguage !== "English") {
+      translateCurrentQuestion();
+    }
+  }, [data.length]);
+
   return (
     <>
       <div
@@ -1257,11 +1407,32 @@ export default function NewQuestion() {
                       className="flex justify-between items-center border xsm:overflow-y-auto p-3 rounded-lg font-pop xsm:h-[10vh] xsm:flex-col xsm:gap-2"
                       onContextMenu={(e) => e.preventDefault()}
                     >
-                      
-                      <div className="font-bold text-xl flex xsm:text-[12px] justify-center gap-3 items-center w-fit ">
-                        <p className="bg-white p-2 rounded-lg shadow-md xsm:mt-6 ">
+                      {/* Header ke andar language selector ko integrate karein */}
+                      <div className="font-bold text-xl flex xsm:text-[12px] justify-center gap-3 items-center w-fit">
+                        <p className="bg-white p-2 rounded-lg shadow-md xsm:mt-6">
                           Time Remaining: {formatTime(timer)}
                         </p>
+
+                        {/* <select
+                          value={selectedLanguage}
+                          onChange={(e) => setSelectedLanguage(e.target.value)}
+                          className="p-2 border rounded-lg bg-white shadow-lg text-sm"
+                        >
+                          <option value="English">English</option>
+                          <option value="Hindi">हिन्दी</option>
+                          <option value="Punjabi">ਪੰਜਾਬੀ</option>
+                        </select> */}
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => setSelectedLanguage(e.target.value)}
+                          className="p-2 border rounded-lg bg-white shadow-lg text-sm"
+                        >
+                          {Object.keys(languageMap).map((lang) => (
+                            <option key={lang} value={lang}>
+                              {lang}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                       <div className="font-semibold text-lg  text-left xsm:text-sm xsm:text-green-500">
                         {assessmentname}
@@ -1286,8 +1457,7 @@ export default function NewQuestion() {
                           }
                         />
                       </div>
-                      </div>
-                   
+                    </div>
 
                     <div className="flex justify-between h-[77vh] xsm:h-full xsm:flex-col xsm:gap-1 font-pop xsm:overflow-y-auto">
                       {index + 1 <= Length ? (
@@ -1296,9 +1466,18 @@ export default function NewQuestion() {
                             {/* <div className="border-b-[2px] p-3 font-semibold">
                               {data[index]?.module}
                             </div> */}
+                            {/* // Current question display update karein */}
+                            {/* Question Text */}
                             <div className="p-3 text-lg xsm:overflow-y-auto xsm:h-full xsm:text-justify xsm:text-sm text-gray-700">
-                              Q:{index + 1}
-                              {") "} {data[index]?.question}
+                              {selectedLanguage === "English"
+                                ? "Q"
+                                : selectedLanguage === "Hindi"
+                                ? "प्रश्न"
+                                : "ਸਵाल"}
+                              {index + 1}
+                              {") "}
+                              {translatedQuestions[`q${index}`] ||
+                                data[index]?.question}
                             </div>
                           </div>
                           <div className="w-[35%] rounded-xl border min-h-full shadow-xl overflow-y-auto xsm:w-full xsm:h-[50vh] scrollbarnumber">
@@ -1311,25 +1490,28 @@ export default function NewQuestion() {
                                   ([key, value]) => (
                                     <label
                                       key={key}
-                                      onChange={() =>
-                                        setSelected(key.toString())
-                                      }
                                       htmlFor={key.toString()}
                                       className={`${
                                         Selected === key.toString()
-                                          ? "border-[#1DBF73]"
-                                          : ""
-                                      } flex p-3 border xsm:text-xs rounded-lg space-x-2 cursor-pointer`}
+                                          ? "border-[#1DBF73] border-2 bg-green-50"
+                                          : "border-gray-300"
+                                      } flex p-3 border xsm:text-xs rounded-lg space-x-2 cursor-pointer hover:bg-gray-50 transition-colors`}
                                     >
                                       <input
                                         name="option"
                                         id={key.toString()}
                                         type="radio"
                                         checked={Selected === key.toString()}
-                                        onChange={() => setSelected(key.toString())}
+                                        onChange={() =>
+                                          setSelected(key.toString())
+                                        }
                                         className="accent-[#1DBF73] xsm:z-50"
                                       />
-                                      <p>{value}</p>
+                                      <p className="flex-1">
+                                        {translatedQuestions[
+                                          `${index}_${key}`
+                                        ] || value}
+                                      </p>
                                     </label>
                                   )
                                 )}
