@@ -106,7 +106,7 @@ const AssessmentPage = ({ onContinue,data }) => {
                 </h2>
                 <h3 className="mt-0 text-[40px] xsm:text-2xl text-[rgba(29,191,115,1)] font-poppins">
                     {data?.assessmentName}
-                </h3>
+                </h3> 
 
 
                 <form className="space-y-6">
