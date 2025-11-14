@@ -13,6 +13,8 @@ import { SlRefresh } from "react-icons/sl";
 import html2canvas from "html2canvas";
 import { IoIosTime } from "react-icons/io";
 import { IoDocumentTextSharp } from "react-icons/io5";
+import { getAssessmentDataFromStorage } from "../Enterancepage/AssessmentPage";
+
 const base64ToBlob = (base64, contentType = "image/jpeg") => {
   const byteCharacters = atob(base64.split(",")[1]);
   const byteNumbers = new Array(byteCharacters.length);
@@ -36,6 +38,13 @@ export default function NewQuestion() {
   const [personDetectionDisabled, setPersonDetectionDisabled] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [translatedQuestions, setTranslatedQuestions] = useState({});
+
+  const assessmentData = getAssessmentDataFromStorage();
+
+  console.log(
+    "assessmentData assessmentData assessmentData",
+    assessmentData.Assessmentmodules
+  );
 
   const [screenshots, setScreenshots] = useState(() => {
     const key = `screenshots${localStorage.getItem("assessmenttoken")}`;
@@ -150,6 +159,7 @@ export default function NewQuestion() {
       });
 
       const response = await data.json();
+      console.log("response Assessmentmodules", response)
 
       if (response.success) {
         setshow(false);

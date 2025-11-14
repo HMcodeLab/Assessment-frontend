@@ -93,7 +93,7 @@ const [proctoringActive, setProctoringActive] = useState({
   // }, []);
   async function Fetchdata() {
     try {
-      let url = `${BASE_URL}/getAssesmentAllQuestions`;
+      let url = `${BASE_URL}/getAssessmentAllQuestions`;
       setshow(true);
       const data = await fetch(url, {
         method: "GET",
@@ -188,7 +188,7 @@ const [proctoringActive, setProctoringActive] = useState({
           remarks:remarks
         }),
       });
-      
+
       const response = await data[index].json();
       if (response.success) {
         localStorage.removeItem(localStorage.getItem('assesmenttoken'))
