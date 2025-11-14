@@ -304,12 +304,67 @@ export default function NewQuestion() {
 
   const translationCache = useRef({});
 
+  // const translateCurrentQuestion = useCallback(async () => {
+  //   if (!data[index]) return;
+
+  //   const cacheKey = `${index}_${selectedLanguage}`;
+
+  //   // Check cache first to avoid duplicate API calls
+  //   if (translationCache.current[cacheKey]) {
+  //     setTranslatedQuestions((prev) => ({
+  //       ...prev,
+  //       ...translationCache.current[cacheKey],
+  //     }));
+  //     return;
+  //   }
+
+  //   const newTranslations = {};
+
+  //   try {
+  //     // Translate question
+  //     if (data[index]?.question) {
+  //       const translatedQ = await translateText(
+  //         data[index].question,
+  //         selectedLanguage
+  //       );
+  //       newTranslations[`q${index}`] = translatedQ;
+  //     }
+
+  //     // Translate options - use Promise.all for parallel requests
+  //     if (data[index]?.options) {
+  //       const translationPromises = Object.entries(data[index].options).map(
+  //         async ([key, value]) => {
+  //           const translatedOpt = await translateText(value, selectedLanguage);
+  //           newTranslations[`${index}_${key}`] = translatedOpt;
+  //         }
+  //       );
+
+  //       await Promise.all(translationPromises);
+  //     }
+
+  //     // Update cache
+  //     translationCache.current[cacheKey] = newTranslations;
+
+  //     // Update state
+  //     setTranslatedQuestions((prev) => ({
+  //       ...prev,
+  //       ...newTranslations,
+  //     }));
+  //   } catch (error) {
+  //     console.error("Translation failed:", error);
+  //     // Fallback to original text on error
+  //   }
+  // }, [data, index, selectedLanguage]);
+
   const translateCurrentQuestion = useCallback(async () => {
-    if (!data[index]) return;
+    if (!data[index] || selectedLanguage === "English") {
+      setTranslatedQuestions({});
+      return;
+    }
 
     const cacheKey = `${index}_${selectedLanguage}`;
 
-    // Check cache first to avoid duplicate API calls
+    // Cache check
     if (translationCache.current[cacheKey]) {
       setTranslatedQuestions((prev) => ({
         ...prev,
@@ -318,9 +373,9 @@ export default function NewQuestion() {
       return;
     }
 
-    const newTranslations = {};
-
     try {
+      const newTranslations = {};
+
       // Translate question
       if (data[index]?.question) {
         const translatedQ = await translateText(
@@ -330,32 +385,26 @@ export default function NewQuestion() {
         newTranslations[`q${index}`] = translatedQ;
       }
 
-      // Translate options - use Promise.all for parallel requests
+      // Translate options - PROPERLY
       if (data[index]?.options) {
-        const translationPromises = Object.entries(data[index].options).map(
-          async ([key, value]) => {
-            const translatedOpt = await translateText(value, selectedLanguage);
-            newTranslations[`${index}_${key}`] = translatedOpt;
-          }
-        );
+        const optionEntries = Object.entries(data[index].options);
 
-        await Promise.all(translationPromises);
+        for (let [key, value] of optionEntries) {
+          const translatedOpt = await translateText(value, selectedLanguage);
+          newTranslations[`${index}_${key}`] = translatedOpt;
+        }
       }
 
-      // Update cache
+      // Update cache and state
       translationCache.current[cacheKey] = newTranslations;
-
-      // Update state
       setTranslatedQuestions((prev) => ({
         ...prev,
         ...newTranslations,
       }));
     } catch (error) {
       console.error("Translation failed:", error);
-      // Fallback to original text on error
     }
-  }, [data, index, selectedLanguage]); // ✅ translatedQuestions removed from dependencies
-
+  }, [data, index, selectedLanguage]);
   useEffect(() => {
     if (selectedLanguage !== "English" && data.length > 0 && data[index]) {
       translateCurrentQuestion();
@@ -1220,52 +1269,77 @@ export default function NewQuestion() {
 
   // Translation function - optimize karein
   // Translation function - properly define karein
-const languageMap = {
-  English: "en",
-  Hindi: "hi",
-  Punjabi: "pa",
-  Bengali: "bn",
-  Gujarati: "gu",
-  Tamil: "ta",
-  Telugu: "te",
-  Kannada: "kn",
-  Malayalam: "ml",
-  Urdu: "ur",
-  Nepali: "ne",
-  // foreign bhi daal sakte ho
-  French: "fr",
-  German: "de",
-  Spanish: "es",
-  Russian: "ru",
-  Chinese: "zh-CN",
-  Japanese: "ja",
-  Korean: "ko",
-  Arabic: "ar",
-};
+  const languageMap = {
+    English: "en",
+    Hindi: "hi",
+    Punjabi: "pa",
+    Bengali: "bn",
+    Gujarati: "gu",
+    Tamil: "ta",
+    Telugu: "te",
+    Kannada: "kn",
+    Malayalam: "ml",
+    Urdu: "ur",
+    Nepali: "ne",
+    // foreign bhi daal sakte ho
+    French: "fr",
+    German: "de",
+    Spanish: "es",
+    Russian: "ru",
+    Chinese: "zh-CN",
+    Japanese: "ja",
+    Korean: "ko",
+    Arabic: "ar",
+  };
 
-const translateText = async (text, targetLang) => {
-  try {
-    if (!text || targetLang === "English") return text;
+  // const translateText = async (text, targetLang) => {
+  //   try {
+  //     if (!text || targetLang === "English") return text;
 
-    const langCode = languageMap[targetLang] || "en"; // mapping se lang code lo
+  //     const langCode = languageMap[targetLang] || "en"; // mapping se lang code lo
 
-    const response = await fetch(
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${langCode}&dt=t&q=${encodeURIComponent(
-        text
-      )}`
-    );
+  //     const response = await fetch(
+  //       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${langCode}&dt=t&q=${encodeURIComponent(
+  //         text
+  //       )}`
+  //     );
 
-    const data = await response.json();
+  //     const data = await response.json();
 
-    return data[0][0][0] || text;
-  } catch (error) {
-    console.error("Translation error:", error);
-    return text;
-  }
-};
-
+  //     return data[0][0][0] || text;
+  //   } catch (error) {
+  //     console.error("Translation error:", error);
+  //     return text;
+  //   }
+  // };
 
   // Sirf ek useEffect use karein translation ke liye
+
+  const translateText = async (text, targetLang) => {
+    try {
+      if (!text || targetLang === "English") return text;
+
+      const langCode = languageMap[targetLang];
+      if (!langCode) return text;
+
+      const response = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${langCode}&dt=t&q=${encodeURIComponent(
+          text
+        )}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Translation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data[0]?.[0]?.[0] || text;
+    } catch (error) {
+      console.error("Translation error:", error);
+      return text; // Fallback to original text
+    }
+  };
+
   useEffect(() => {
     if (data.length > 0 && data[index]) {
       translateCurrentQuestion();
@@ -1485,7 +1559,7 @@ const translateText = async (text, targetLang) => {
                               Options
                             </div>
                             <div className="flex flex-col p-5 gap-y-5 ">
-                              {data[index]?.options &&
+                              {/* {data[index]?.options &&
                                 Object.entries(data[index]?.options).map(
                                   ([key, value]) => (
                                     <label
@@ -1508,13 +1582,57 @@ const translateText = async (text, targetLang) => {
                                         className="accent-[#1DBF73] xsm:z-50"
                                       />
                                       <p className="flex-1">
+                                        {console.log("Translation Debug:", {
+                                          key: `${index}_${key}`,
+                                          translated:
+                                            translatedQuestions[
+                                              `${index}_${key}`
+                                            ],
+                                          original: value,
+                                          allTranslations: translatedQuestions,
+                                        })}
                                         {translatedQuestions[
                                           `${index}_${key}`
                                         ] || value}
                                       </p>
                                     </label>
                                   )
+                                )} */}
+
+                              {data[index]?.options &&
+                                Object.entries(data[index]?.options).map(
+                                  ([key, value]) => {
+                                    const translationKey = `${index}_${key}`;
+                                    const displayText =
+                                      translatedQuestions[translationKey] ||
+                                      value;
+
+                                    return (
+                                      <label
+                                        key={key}
+                                        htmlFor={key.toString()}
+                                        className={`${
+                                          Selected === key.toString()
+                                            ? "border-[#1DBF73] border-2 bg-green-50"
+                                            : "border-gray-300"
+                                        } flex p-3 border xsm:text-xs rounded-lg space-x-2 cursor-pointer hover:bg-gray-50 transition-colors`}
+                                      >
+                                        <input
+                                          name="option"
+                                          id={key.toString()}
+                                          type="radio"
+                                          checked={Selected === key.toString()}
+                                          onChange={() =>
+                                            setSelected(key.toString())
+                                          }
+                                          className="accent-[#1DBF73] xsm:z-50"
+                                        />
+                                        <p className="flex-1">{displayText}</p>
+                                      </label>
+                                    );
+                                  }
                                 )}
+
                               <div className="flex justify-end space-x-2">
                                 <button
                                   className={`shadow-lg py-2 px-4 xsm:text-xs rounded-xl bg-[#1DBF73] text-white ${

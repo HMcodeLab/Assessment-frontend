@@ -188,6 +188,7 @@ const [proctoringActive, setProctoringActive] = useState({
           remarks:remarks
         }),
       });
+      
       const response = await data[index].json();
       if (response.success) {
         localStorage.removeItem(localStorage.getItem('assesmenttoken'))
